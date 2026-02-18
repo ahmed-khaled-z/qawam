@@ -1,4 +1,4 @@
-enum SpalshStatus { initial, authenticated, unauthenticated }
+enum SpalshStatus { initial, authenticated, unauthenticated, needsOnboarding }
 
 class SpalshState {
   final SpalshStatus status;

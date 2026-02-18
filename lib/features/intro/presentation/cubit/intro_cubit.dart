@@ -1,32 +1,21 @@
-import '../../domain/use_cases/intro_use_case.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../domain/repositories/intro_repository.dart';
 import 'intro_state.dart';
 
 class IntroCubit extends Cubit<IntroState> {
-  final IntroUseCase introUseCase;
+  final IntroRepository _repository;
 
-  IntroCubit({required this.introUseCase})
-      : super(const IntroState(status: IntroStatus.initial));
+  IntroCubit({required IntroRepository repository})
+      : _repository = repository,
+        super(const IntroState());
 
-  Future<void> fetchData() async {
-    emit(state.copyWith(status: IntroStatus.loading));
+  void onPageChanged(int page) {
+    emit(state.copyWith(currentPage: page));
+  }
 
-    final result = await introUseCase.call();
-
-    result.fold(
-      (exception) => emit(
-        state.copyWith(
-          status: IntroStatus.error,
-          errorMessage: exception.toString(),
-        ),
-      ),
-      (_) => emit(
-        state.copyWith(
-          status: IntroStatus.loaded,
-          errorMessage: null,
-        ),
-      ),
-    );
+  Future<void> completeOnboarding() async {
+    await _repository.completeOnboarding();
+    emit(state.copyWith(isCompleted: true));
   }
 }

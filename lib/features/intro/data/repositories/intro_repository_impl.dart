@@ -1,21 +1,19 @@
-import 'package:dartz/dartz.dart';
-import '../../domain/repositories/intro_repository.dart';
-import '../data_sources/remote/intro_remote_data_source.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../domain/repositories/intro_repository.dart';
 
 class IntroRepositoryImpl implements IntroRepository {
-  final IntroRemoteDataSource remoteDataSource;
-
-  IntroRepositoryImpl({required this.remoteDataSource});
+  static const _key = 'hasSeenOnboarding';
 
   @override
-  Future<Either<Exception, Unit>> callApi() async {
-    try {
-      return Right(await remoteDataSource.callApi());
-    } on Exception catch (exception) {
-      return Left(exception);
-    }
+  Future<bool> hasSeenOnboarding() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool(_key) ?? false;
   }
 
+  @override
+  Future<void> completeOnboarding() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_key, true);
+  }
 }
-

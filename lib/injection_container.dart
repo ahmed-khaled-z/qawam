@@ -10,6 +10,7 @@ import 'package:qawam/features/profile/inject_profile.dart';
 import 'package:qawam/features/spalsh/inject_spalsh.dart';
 import 'package:qawam/features/statistics/inject_statistics.dart';
 import 'package:qawam/features/feature_request/inject_feature_request.dart';
+import 'package:qawam/features/intro/inject_intro.dart';
 
 import 'core/network/api_provider.dart';
 import 'core/security/encryption_service.dart';
@@ -64,6 +65,7 @@ class ServiceLocator {
     );
     getIt.registerLazySingleton(() => SyncService(getIt()));
 
+    injectIntro();
     injectLogin();
     injectSpalsh();
     injectBottomNav();

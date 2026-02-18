@@ -116,5 +116,15 @@
     "suggest_status_pending": "Pending",
     "suggest_status_approved": "Approved",
     "suggest_status_rejected": "Rejected",
-    "suggest_status_implemented": "Implemented"
+    "suggest_status_implemented": "Implemented",
+
+    "intro_slide1_title": "Track Every Expense",
+    "intro_slide1_desc": "Understand where your money goes.\nTake control of your financial habits\nwith simple, smart tracking.",
+    "intro_slide2_title": "Works Offline",
+    "intro_slide2_desc": "Add expenses without internet.\nYour data is stored locally\nand syncs when you're connected.",
+    "intro_slide3_title": "Encrypted & Secure",
+    "intro_slide3_desc": "All your financial data is encrypted.\nPrivacy-first architecture\nkeeps your information safe.",
+    "intro_skip": "Skip",
+    "intro_next": "Next",
+    "intro_get_started": "Get Started"
 }

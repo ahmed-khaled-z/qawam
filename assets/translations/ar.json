@@ -116,5 +116,15 @@
     "suggest_status_pending": "قيد المراجعة",
     "suggest_status_approved": "موافق عليه",
     "suggest_status_rejected": "مرفوض",
-    "suggest_status_implemented": "تم تنفيذه"
+    "suggest_status_implemented": "تم تنفيذه",
+
+    "intro_slide1_title": "تتبّع كل مصروف",
+    "intro_slide1_desc": "افهم أين تذهب أموالك.\nتحكّم في عاداتك المالية\nبتتبّع بسيط وذكي.",
+    "intro_slide2_title": "يعمل بدون إنترنت",
+    "intro_slide2_desc": "أضف مصروفاتك بدون اتصال.\nبياناتك مخزّنة محلياً\nوتُزامَن عند الاتصال.",
+    "intro_slide3_title": "مشفّر وآمن",
+    "intro_slide3_desc": "جميع بياناتك المالية مشفّرة.\nهندسة الخصوصية أولاً\nتحمي معلوماتك.",
+    "intro_skip": "تخطي",
+    "intro_next": "التالي",
+    "intro_get_started": "ابدأ الآن"
 }

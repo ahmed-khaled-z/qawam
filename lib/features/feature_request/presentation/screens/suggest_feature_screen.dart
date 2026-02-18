@@ -343,8 +343,6 @@ class _RequestCard extends StatelessWidget {
 
   const _RequestCard({required this.request});
 
-  static const _teal = Color(0xFF0D7377);
-
   Color _statusColor(FeatureRequestStatus status) {
     switch (status) {
       case FeatureRequestStatus.pending:

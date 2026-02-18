@@ -7,6 +7,7 @@ import 'package:qawam/features/login/presentation/screens/login_screen.dart';
 import 'package:qawam/features/settings/presentation/screens/settings_screen.dart';
 import 'package:qawam/features/profile/presentation/screens/profile_screen.dart';
 import 'package:qawam/features/spalsh/presentation/screens/spalsh_screen.dart';
+import 'package:qawam/features/intro/presentation/screens/intro_screen.dart';
 import 'unknown_route.dart';
 
 class AppRouter {
@@ -19,6 +20,11 @@ class AppRouter {
       case '/':
         return MaterialPageRoute(
           builder: (_) => const SpalshScreen(),
+          settings: settings,
+        );
+      case IntroScreen.routeName:
+        return MaterialPageRoute(
+          builder: (_) => const IntroScreen(),
           settings: settings,
         );
       case LoginScreen.routeName:

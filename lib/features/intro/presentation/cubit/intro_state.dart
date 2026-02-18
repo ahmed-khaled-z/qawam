@@ -1,27 +1,26 @@
+import 'package:equatable/equatable.dart';
 
-enum IntroStatus {
-  initial,
-  loading,
-  loaded,
-  error,
-}
-
-class IntroState {
-  final IntroStatus status;
-  final String? errorMessage;
+class IntroState extends Equatable {
+  final int currentPage;
+  final bool isCompleted;
 
   const IntroState({
-    required this.status,
-    this.errorMessage,
+    this.currentPage = 0,
+    this.isCompleted = false,
   });
 
+  bool get isLastPage => currentPage == 2;
+
   IntroState copyWith({
-    IntroStatus? status,
-    String? errorMessage,
+    int? currentPage,
+    bool? isCompleted,
   }) {
     return IntroState(
-      status: status ?? this.status,
-      errorMessage: errorMessage ?? this.errorMessage,
+      currentPage: currentPage ?? this.currentPage,
+      isCompleted: isCompleted ?? this.isCompleted,
     );
   }
+
+  @override
+  List<Object?> get props => [currentPage, isCompleted];
 }

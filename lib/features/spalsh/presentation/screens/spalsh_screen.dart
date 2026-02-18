@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../config/language/language_manager.dart';
 import '../../../../config/router/app_router.dart';
+import '../../../intro/presentation/screens/intro_screen.dart';
 import '../../../login/presentation/screens/login_screen.dart';
 import '../cubit/spalsh_cubit.dart';
 import '../cubit/spalsh_state.dart';
@@ -64,7 +65,9 @@ class _SpalshScreenState extends State<SpalshScreen>
       value: _cubit,
       child: BlocListener<SpalshCubit, SpalshState>(
         listener: (context, state) {
-          if (state.status == SpalshStatus.authenticated) {
+          if (state.status == SpalshStatus.needsOnboarding) {
+            AppRouter.toAndRemoveUntil(IntroScreen.routeName);
+          } else if (state.status == SpalshStatus.authenticated) {
             AppRouter.toAndRemoveUntil('/home');
           } else if (state.status == SpalshStatus.unauthenticated) {
             AppRouter.toAndRemoveUntil(LoginScreen.routeName);
