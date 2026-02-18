@@ -52,7 +52,7 @@ class StatCard extends StatelessWidget {
                   letterSpacing: -0.3,
                 ),
               ),
-              if (action != null) action!,
+              ?action,
             ],
           ),
           const SizedBox(height: 20),

@@ -94,7 +94,7 @@ class AuthManager<T> extends ChangeNotifier {
       if (_currentUser != null) {
         String userDataString;
         if (toJson != null) {
-          userDataString = jsonEncode(toJson!(_currentUser!));
+          userDataString = jsonEncode(toJson!(_currentUser as T));
         } else {
           userDataString = jsonEncode(_currentUser);
         }

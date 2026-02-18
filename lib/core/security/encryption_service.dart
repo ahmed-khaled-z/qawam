@@ -74,7 +74,7 @@ class EncryptionService {
       // In a real app, you might want to return null or handle this gracefully.
       // For now, rethrow or return 0.0 to avoid crash logic in UI?
       // Better to throw so we know something is wrong.
-      throw e;
+      rethrow;
     }
   }
 

@@ -2,7 +2,7 @@ import '../../injection_container.dart';
 import 'presentation/cubit/expenses_cubit.dart';
 
 /// Call this function in ServiceLocator.setup() function
-injectExpenses() {
+void injectExpenses() {
   // Cubit
   getIt.registerFactory(
     () => ExpensesCubit(

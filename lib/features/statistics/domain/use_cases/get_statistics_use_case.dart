@@ -83,18 +83,21 @@ class GetStatisticsUseCase {
   ) {
     return expenses.where((expense) {
       if (filters.startDate != null &&
-          expense.date.isBefore(filters.startDate!))
+          expense.date.isBefore(filters.startDate!)) {
         return false;
+      }
       if (filters.endDate != null &&
           expense.date.isAfter(
             filters.endDate!
                 .add(const Duration(days: 1))
                 .subtract(const Duration(milliseconds: 1)),
-          ))
+          )) {
         return false;
+      }
       if (filters.categoryIds.isNotEmpty &&
-          !filters.categoryIds.contains(expense.categoryId))
+          !filters.categoryIds.contains(expense.categoryId)) {
         return false;
+      }
       return true;
     }).toList();
   }
@@ -319,9 +322,9 @@ class GetStatisticsUseCase {
 
     for (var expense in expenses) {
       final hour = expense.date.hour;
-      if (hour >= 5 && hour < 12)
+      if (hour >= 5 && hour < 12) {
         morning += expense.amount;
-      else if (hour >= 12 && hour < 17)
+      } else if (hour >= 12 && hour < 17)
         afternoon += expense.amount;
       else if (hour >= 17 && hour < 21)
         evening += expense.amount;

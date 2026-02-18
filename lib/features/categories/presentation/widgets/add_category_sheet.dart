@@ -120,7 +120,7 @@ class _AddCategorySheetState extends State<AddCategorySheet> {
             child: ListView.separated(
               scrollDirection: Axis.horizontal,
               itemCount: _icons.length,
-              separatorBuilder: (_, __) => const SizedBox(width: 10),
+              separatorBuilder: (_, _) => const SizedBox(width: 10),
               itemBuilder: (context, index) {
                 final icon = _icons[index];
                 final isSelected = icon.codePoint == _selectedIconCode;
@@ -159,7 +159,7 @@ class _AddCategorySheetState extends State<AddCategorySheet> {
             child: ListView.separated(
               scrollDirection: Axis.horizontal,
               itemCount: _colors.length,
-              separatorBuilder: (_, __) => const SizedBox(width: 10),
+              separatorBuilder: (_, _) => const SizedBox(width: 10),
               itemBuilder: (context, index) {
                 final color = _colors[index];
                 final isSelected = color.value == _selectedColor;

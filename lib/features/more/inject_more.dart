@@ -6,7 +6,7 @@ import 'domain/use_cases/more_use_case.dart';
 import 'presentation/cubit/more_cubit.dart';
 
 //call this function in ServiceLocator.setup() function
-injectMore() {
+void injectMore() {
   // cubit
   getIt.registerFactory(() => MoreCubit(moreUseCase: getIt()));
 

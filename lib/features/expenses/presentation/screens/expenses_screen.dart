@@ -186,11 +186,11 @@ class _ExpensesBody extends StatelessWidget {
           ),
           TextButton(
             onPressed: () => context.read<ExpensesCubit>().resetFilters(),
-            child: Text(context.tr('reset')),
             style: TextButton.styleFrom(
               foregroundColor: const Color(0xFF0D7377),
               padding: EdgeInsets.zero,
             ),
+            child: Text(context.tr('reset')),
           ),
         ],
       ),

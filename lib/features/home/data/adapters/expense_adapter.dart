@@ -37,7 +37,7 @@ class ExpenseAdapter extends TypeAdapter<ExpenseModel> {
       note = reader.read() as String;
       isSyncedToFirebase = reader.read() as bool;
     } catch (e) {
-      throw e;
+      rethrow;
     }
 
     try {

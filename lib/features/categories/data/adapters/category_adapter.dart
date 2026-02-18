@@ -22,7 +22,7 @@ class CategoryAdapter extends TypeAdapter<CategoryModel> {
       isSyncedToFirebase = reader.read() as bool;
     } catch (e) {
       // In case basic fields fail (should not happen if data is valid)
-      throw e;
+      rethrow;
     }
 
     try {
