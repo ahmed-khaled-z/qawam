@@ -104,5 +104,17 @@
     "no_data": "لا توجد بيانات متاحة",
     "trend": "الاتجاه",
     "edit_expense": "تعديل المصروف",
-    "expense_updated_success": "تم تحديث المصروف بنجاح"
+    "expense_updated_success": "تم تحديث المصروف بنجاح",
+    "suggest_form_title": "ماذا تود أن ترى؟",
+    "suggest_message_hint": "صف الميزة أو التحسين الذي تريده...",
+    "suggest_message_required": "يرجى إدخال اقتراحك",
+    "suggest_notes_hint": "تفاصيل إضافية (اختياري)",
+    "suggest_submit": "إرسال",
+    "suggest_submitted": "شكراً! تم إرسال اقتراحك.",
+    "suggest_my_requests": "اقتراحاتي",
+    "suggest_no_requests": "لم ترسل أي اقتراحات بعد.",
+    "suggest_status_pending": "قيد المراجعة",
+    "suggest_status_approved": "موافق عليه",
+    "suggest_status_rejected": "مرفوض",
+    "suggest_status_implemented": "تم تنفيذه"
 }

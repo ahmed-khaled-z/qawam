@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'package:qawam/features/bottom_nav/presentation/screens/bottom_nav_screen.dart';
 import 'package:qawam/features/expenses/presentation/screens/expenses_screen.dart';
+import 'package:qawam/features/feature_request/presentation/screens/suggest_feature_screen.dart';
 import 'package:qawam/features/login/presentation/screens/login_screen.dart';
 import 'package:qawam/features/settings/presentation/screens/settings_screen.dart';
 import 'package:qawam/features/profile/presentation/screens/profile_screen.dart';
@@ -43,6 +44,11 @@ class AppRouter {
       case ExpensesScreen.routeName:
         return MaterialPageRoute(
           builder: (_) => const ExpensesScreen(),
+          settings: settings,
+        );
+      case SuggestFeatureScreen.routeName:
+        return MaterialPageRoute(
+          builder: (_) => const SuggestFeatureScreen(),
           settings: settings,
         );
       default:

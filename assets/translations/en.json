@@ -104,5 +104,17 @@
     "no_data": "No data available",
     "trend": "Trend",
     "edit_expense": "Edit Expense",
-    "expense_updated_success": "Expense updated successfully"
+    "expense_updated_success": "Expense updated successfully",
+    "suggest_form_title": "What would you like to see?",
+    "suggest_message_hint": "Describe your feature or improvement...",
+    "suggest_message_required": "Please enter your suggestion",
+    "suggest_notes_hint": "Additional details (optional)",
+    "suggest_submit": "Submit",
+    "suggest_submitted": "Thanks! Your suggestion was submitted.",
+    "suggest_my_requests": "My suggestions",
+    "suggest_no_requests": "You haven't submitted any suggestions yet.",
+    "suggest_status_pending": "Pending",
+    "suggest_status_approved": "Approved",
+    "suggest_status_rejected": "Rejected",
+    "suggest_status_implemented": "Implemented"
 }

@@ -12,6 +12,7 @@ import '../../../profile/presentation/cubit/profile_cubit.dart';
 import '../../../profile/presentation/cubit/profile_state.dart';
 import '../../../profile/presentation/screens/profile_screen.dart';
 import '../../../settings/presentation/screens/settings_screen.dart';
+import '../../../feature_request/presentation/screens/suggest_feature_screen.dart';
 import '../../../../../../core/sync/sync_service.dart';
 import '../../../../../../injection_container.dart';
 
@@ -95,7 +96,7 @@ class _MoreScreenState extends State<MoreScreen> with TickerProviderStateMixin {
                         icon: Icons.lightbulb_outline_rounded,
                         color: const Color(0xFFFFA726),
                         label: context.tr('more_suggest'),
-                        onTap: () => _showComingSoon(context),
+                        onTap: () => AppRouter.to(SuggestFeatureScreen.routeName),
                       ),
                     ],
                   ),
