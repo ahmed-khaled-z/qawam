@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -28,7 +29,6 @@ class _MoreScreenState extends State<MoreScreen> with TickerProviderStateMixin {
   late final List<Animation<double>> _itemAnimations;
 
   static const _itemCount = 7;
-  static const _teal = Color(0xFF0D7377);
 
   @override
   void initState() {
@@ -80,23 +80,26 @@ class _MoreScreenState extends State<MoreScreen> with TickerProviderStateMixin {
                         icon: Icons.info_outline_rounded,
                         color: const Color(0xFF5C6BC0),
                         label: context.tr('more_about'),
-                        onTap: () => _showComingSoon(context),
+                        onTap: () => _openUrl('https://qawam.life/index.html'),
                       ),
+
                       _divider(),
                       _buildAnimatedItem(
                         index: 1,
                         icon: Icons.mail_outline_rounded,
                         color: const Color(0xFF26A69A),
                         label: context.tr('more_contact'),
-                        onTap: () => _showComingSoon(context),
+                        onTap: () => _openUrl('https://qawam.life/index.html'),
                       ),
+
                       _divider(),
                       _buildAnimatedItem(
                         index: 2,
                         icon: Icons.lightbulb_outline_rounded,
                         color: const Color(0xFFFFA726),
                         label: context.tr('more_suggest'),
-                        onTap: () => AppRouter.to(SuggestFeatureScreen.routeName),
+                        onTap: () =>
+                            AppRouter.to(SuggestFeatureScreen.routeName),
                       ),
                     ],
                   ),
@@ -111,15 +114,19 @@ class _MoreScreenState extends State<MoreScreen> with TickerProviderStateMixin {
                         icon: Icons.description_outlined,
                         color: const Color(0xFF78909C),
                         label: context.tr('more_terms'),
-                        onTap: () => _showComingSoon(context),
+                        onTap: () => _openUrl(
+                          'https://qawam.life/terms-and-conditions.html',
+                        ),
                       ),
+
                       _divider(),
                       _buildAnimatedItem(
                         index: 4,
                         icon: Icons.shield_outlined,
                         color: const Color(0xFF8D6E63),
                         label: context.tr('more_privacy'),
-                        onTap: () => _showComingSoon(context),
+                        onTap: () =>
+                            _openUrl('https://qawam.life/privacy-policy.html'),
                       ),
                     ],
                   ),
@@ -322,17 +329,18 @@ class _MoreScreenState extends State<MoreScreen> with TickerProviderStateMixin {
     );
   }
 
-  void _showComingSoon(BuildContext context) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(context.tr('coming_soon')),
-        behavior: SnackBarBehavior.floating,
-        backgroundColor: _teal,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        margin: const EdgeInsets.all(20),
-        duration: const Duration(seconds: 2),
-      ),
-    );
+  Future<void> _openUrl(String link) async {
+    final Uri url = Uri.parse(link);
+    if (!await launchUrl(url, mode: LaunchMode.inAppWebView)) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Could not launch $link'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 
   Future<void> _handleLogout(BuildContext context) async {
