@@ -204,7 +204,7 @@ class _SpalshScreenState extends State<SpalshScreen>
 
         // Tagline — translated
         Text(
-          context.tr('splash_tagline'),
+          "وَالَّذِينَ إِذَا أَنفَقُوا لَمْ يُسْرِفُوا وَلَمْ يَقْتُرُوا وَكَانَ بَيْنَ ذَٰلِكَ قَوَامًا",
           style: TextStyle(
             fontSize: 15,
             fontWeight: FontWeight.w400,
