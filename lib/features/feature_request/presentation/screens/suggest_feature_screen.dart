@@ -329,7 +329,7 @@ class _SuggestFeatureBodyState extends State<_SuggestFeatureBody> {
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       itemCount: requests.length,
-      separatorBuilder: (_, __) => const SizedBox(height: 12),
+      separatorBuilder: (_, _) => const SizedBox(height: 12),
       itemBuilder: (context, index) {
         final request = requests[index];
         return _RequestCard(request: request);

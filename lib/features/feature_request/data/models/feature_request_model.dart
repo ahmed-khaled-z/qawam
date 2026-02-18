@@ -47,8 +47,8 @@ class FeatureRequestModel {
       message: data['message'] as String? ?? '',
       additionalNotes: data['additionalNotes'] as String?,
       createdAt: createdAt is Timestamp
-          ? (createdAt as Timestamp).toDate()
-          : (createdAt is DateTime ? createdAt as DateTime : DateTime.now()),
+          ? (createdAt).toDate()
+          : (createdAt is DateTime ? createdAt : DateTime.now()),
       status: FeatureRequestStatusX.fromString(data['status'] as String?),
     );
   }
