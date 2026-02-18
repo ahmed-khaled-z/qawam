@@ -231,7 +231,7 @@
         },
         {
           "heading": "5. Data & Privacy",
-          "content": "<p>Your use of Qawam is also governed by our <a href='/privacy-policy.html'>Privacy Policy</a>. Key points:</p><ul><li>Expense amounts are encrypted locally with AES-256</li><li>We cannot access or read your encrypted financial data</li><li>You retain full ownership of your data</li><li>You can delete all your data at any time</li></ul>"
+          "content": "<p>Your use of Qawam is also governed by our <a href='privacy-policy.html'>Privacy Policy</a>. Key points:</p><ul><li>Expense amounts are encrypted locally with AES-256</li><li>We cannot access or read your encrypted financial data</li><li>You retain full ownership of your data</li><li>You can delete all your data at any time</li></ul>"
         },
         {
           "heading": "6. Intellectual Property",
@@ -280,8 +280,8 @@
       {
         "title": "Legal",
         "links": [
-          { "label": "Privacy Policy", "href": "/privacy-policy.html" },
-          { "label": "Terms & Conditions", "href": "/terms-and-conditions.html" }
+          { "label": "Privacy Policy", "href": "privacy-policy.html" },
+          { "label": "Terms & Conditions", "href": "terms-and-conditions.html" }
         ]
       },
       {
