@@ -11,8 +11,12 @@ import 'package:qawam/features/spalsh/inject_spalsh.dart';
 import 'package:qawam/features/statistics/inject_statistics.dart';
 import 'package:qawam/features/feature_request/inject_feature_request.dart';
 import 'package:qawam/features/intro/inject_intro.dart';
+import 'package:qawam/features/settings/data/data_sources/local/settings_local_data_source.dart';
 
 import 'core/network/api_provider.dart';
+import 'core/security/crypto_repository.dart';
+import 'core/security/crypto_repository_impl.dart';
+import 'core/security/device_authorization_service.dart';
 import 'core/security/encryption_service.dart';
 import 'package:qawam/features/categories/data/adapters/category_adapter.dart';
 import 'package:qawam/features/categories/data/models/category_model.dart';
@@ -40,9 +44,24 @@ class ServiceLocator {
     // Hive Init
     await Hive.initFlutter();
 
-    // Security (Must be before Adapters/Boxes)
-    getIt.registerLazySingleton(() => EncryptionService());
+    // External (Firestore needed for CryptoRepository)
+    getIt.registerLazySingleton(() => FirebaseFirestore.instance);
+
+    // Crypto and encryption (before Adapters/Boxes)
+    getIt.registerLazySingleton<CryptoRepository>(
+      () => CryptoRepositoryImpl(getIt()),
+    );
+    getIt.registerLazySingleton(
+      () => EncryptionService(cryptoRepository: getIt()),
+    );
     await getIt<EncryptionService>().init();
+
+    getIt.registerLazySingleton(
+      () => DeviceAuthorizationService(
+        getIt<CryptoRepository>(),
+        getIt<EncryptionService>(),
+      ),
+    );
 
     Hive.registerAdapter(CategoryAdapter()); // Id: 0
     Hive.registerAdapter(ExpenseAdapter()); // Id: 1
@@ -51,9 +70,6 @@ class ServiceLocator {
     await Hive.openBox<ExpenseModel>('expenses');
     await Hive.openBox<SyncItem>('pending_deletions');
 
-    // External
-    getIt.registerLazySingleton(() => FirebaseFirestore.instance);
-
     getIt.registerFactory(() => Dio());
     getIt.registerFactory(() => ApiProvider(getIt()));
 
@@ -61,9 +77,15 @@ class ServiceLocator {
 
     // Sync
     getIt.registerLazySingleton<SyncRepository>(
-      () => SyncRepositoryImpl(getIt(), getIt()),
+      () => SyncRepositoryImpl(
+        getIt<FirebaseFirestore>(),
+        getIt<SettingsLocalDataSource>(),
+        getIt<EncryptionService>(),
+      ),
     );
-    getIt.registerLazySingleton(() => SyncService(getIt()));
+    getIt.registerLazySingleton(
+      () => SyncService(getIt<SyncRepository>(), getIt<EncryptionService>()),
+    );
 
     injectIntro();
     injectLogin();

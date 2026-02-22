@@ -8,12 +8,15 @@ import '../data_sources/local/settings_local_data_source.dart';
 import '../data_sources/remote/settings_remote_data_source.dart';
 import '../models/settings_model.dart';
 
-/// Repository implementation that coordinates remote and local data sources
+/// Repository implementation that coordinates remote and local data sources.
 ///
-/// Strategy:
-/// 1. Always try remote (Firestore) first
-/// 2. Cache result locally on success
-/// 3. Fall back to local cache on remote failure
+/// Persistence Strategy (Local-First):
+/// 1. **Fetch**: Always load from local cache first for instant UI.
+///    Then try to merge with remote (Firestore) in the background.
+///    If no local cache and remote fails → use hardcoded defaults.
+/// 2. **Save**: ALWAYS save locally first (guaranteed persistence).
+///    Then try to sync to Firestore in the background (best-effort).
+///    A remote failure must NEVER prevent local persistence.
 class SettingsRepositoryImpl implements SettingsRepository {
   final SettingsRemoteDataSource _remoteDataSource;
   final SettingsLocalDataSource _localDataSource;
@@ -26,68 +29,111 @@ class SettingsRepositoryImpl implements SettingsRepository {
 
   @override
   Future<Either<Exception, Settings>> fetchSettings() async {
+    // ── Step 1: Try to load from local cache first ──────────────────────────
     try {
-      // Try remote first
+      final cached = await _localDataSource.getCachedSettings();
+      if (cached != null) {
+        debugPrint('[Settings] Loaded from local cache: ${cached.toJson()}');
+        // Kick off a background sync from remote (fire-and-forget).
+        _syncFromRemoteInBackground();
+        return Right(cached);
+      }
+    } catch (e) {
+      debugPrint('[Settings] Local cache read error: $e');
+    }
+
+    // ── Step 2: No local cache — try remote ─────────────────────────────────
+    try {
       final model = await _remoteDataSource.fetchSettings();
-
-      // Cache for offline access
+      // Persist remote data locally so next launch is instant.
       await _localDataSource.cacheSettings(model);
-
+      debugPrint('[Settings] Loaded from remote and cached locally.');
       return Right(model);
     } catch (e) {
-      debugPrint('[Settings] Remote fetch failed, trying cache: $e');
-
-      // Fall back to local cache
-      try {
-        final cached = await _localDataSource.getCachedSettings();
-        if (cached != null) {
-          return Right(cached);
-        }
-      } catch (_) {}
-
-      // No remote, no cache — return defaults
-      return const Right(Settings());
+      debugPrint('[Settings] Remote fetch also failed: $e');
     }
+
+    // ── Step 3: Absolute fallback — use hardcoded defaults ──────────────────
+    debugPrint('[Settings] Using default settings.');
+    final defaults = SettingsModel.empty();
+    // Persist defaults so we don't repeat this path every launch.
+    await _localDataSource.cacheSettings(defaults);
+    return Right(defaults);
   }
 
   @override
   Future<Either<Exception, Settings>> saveSettings(Settings settings) async {
+    final model = SettingsModel.fromEntity(settings);
+
+    // ── Step 1: Save locally FIRST — this MUST succeed ──────────────────────
     try {
-      final model = SettingsModel.fromEntity(settings);
-
-      // Save remotely
-      final saved = await _remoteDataSource.saveSettings(model);
-
-      // Update local cache
-      await _localDataSource.cacheSettings(saved);
-
-      return Right(saved);
+      await _localDataSource.cacheSettings(model);
+      debugPrint('[Settings] Saved locally: ${model.toJson()}');
     } catch (e) {
-      debugPrint('[Settings] Save failed: $e');
-      return Left(Exception('Failed to save settings: $e'));
+      debugPrint('[Settings] CRITICAL: Local save failed: $e');
+      return Left(Exception('Failed to save settings locally: $e'));
     }
+
+    // ── Step 2: Sync to Firestore in background (best-effort) ───────────────
+    _syncToRemoteInBackground(model);
+
+    // Return success immediately after local save.
+    return Right(model);
   }
 
   @override
   Future<Either<Exception, List<Currency>>> fetchCurrencies() async {
     try {
-      // Try remote first
+      // Try remote first for currencies (configuration data).
       final models = await _remoteDataSource.fetchCurrencies();
-
-      // Cache
+      // Cache currencies locally.
       await _localDataSource.cacheCurrencies(models);
-
       return Right(models);
     } catch (e) {
       debugPrint('[Settings] Remote currencies fetch failed: $e');
 
-      // Try cache
-      final cached = await _localDataSource.getCachedCurrencies();
-      if (cached != null) {
-        return Right(cached);
-      }
+      // Try local cache fallback.
+      try {
+        final cached = await _localDataSource.getCachedCurrencies();
+        if (cached != null && cached.isNotEmpty) {
+          return Right(cached);
+        }
+      } catch (_) {}
 
       return Left(Exception('Failed to fetch currencies'));
     }
+  }
+
+  // ── Private helpers ────────────────────────────────────────────────────────
+
+  /// Sync settings from Firestore to local cache in the background.
+  /// Only updates local cache if remote has newer/valid data.
+  /// Does NOT overwrite local if remote fetch fails.
+  void _syncFromRemoteInBackground() {
+    Future.microtask(() async {
+      try {
+        final remoteModel = await _remoteDataSource.fetchSettings();
+        // Update local cache to keep remote changes (e.g. from another device).
+        await _localDataSource.cacheSettings(remoteModel);
+        debugPrint('[Settings] Background remote sync complete.');
+      } catch (e) {
+        debugPrint('[Settings] Background remote sync failed (ignored): $e');
+      }
+    });
+  }
+
+  /// Push local settings to Firestore in the background.
+  /// Failure is logged but does NOT affect the UI or local state.
+  void _syncToRemoteInBackground(SettingsModel model) {
+    Future.microtask(() async {
+      try {
+        await _remoteDataSource.saveSettings(model);
+        debugPrint('[Settings] Background remote save complete.');
+      } catch (e) {
+        debugPrint(
+          '[Settings] Background remote save failed (settings still saved locally): $e',
+        );
+      }
+    });
   }
 }

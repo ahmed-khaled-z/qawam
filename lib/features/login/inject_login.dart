@@ -8,7 +8,12 @@ import 'presentation/cubit/login_cubit.dart';
 /// Call this function in ServiceLocator.setup() function
 void injectLogin() {
   // cubit
-  getIt.registerFactory(() => LoginCubit(loginUseCase: getIt()));
+  getIt.registerFactory(
+    () => LoginCubit(
+      loginUseCase: getIt(),
+      encryptionService: getIt(),
+    ),
+  );
 
   // Repository
   getIt.registerLazySingleton<LoginRepository>(

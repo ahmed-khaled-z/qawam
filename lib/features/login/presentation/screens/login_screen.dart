@@ -7,6 +7,7 @@ import '../../../../config/app_helper/app_gaps.dart';
 import '../../../../config/app_helper/app_padding.dart';
 import '../../../../config/language/language_manager.dart';
 import '../../../../config/router/app_router.dart';
+import '../../../../features/device_authorization/presentation/screens/device_authorization_waiting_screen.dart';
 import '../../../../injection_container.dart';
 import '../cubit/login_cubit.dart';
 import '../cubit/login_state.dart';
@@ -63,6 +64,14 @@ class _LoginScreenState extends State<LoginScreen>
         listener: (context, state) {
           if (state.status == LoginStatus.success) {
             AppRouter.toAndRemoveUntil('/home');
+          }
+          if (state.status == LoginStatus.needsDeviceAuthorization &&
+              state.user != null) {
+            AppRouter.navigatorKey.currentState?.pushNamedAndRemoveUntil(
+              DeviceAuthorizationWaitingScreen.routeName,
+              (route) => false,
+              arguments: {'userId': state.user!.uid},
+            );
           }
           if (state.status == LoginStatus.error) {
             ScaffoldMessenger.of(context).showSnackBar(

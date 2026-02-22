@@ -2,6 +2,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:hive/hive.dart';
 import 'package:flutter/foundation.dart';
+
+import '../security/encryption_service.dart';
 import '../../features/home/data/models/expense_model.dart';
 import '../../features/categories/data/models/category_model.dart';
 import '../../features/settings/data/data_sources/local/settings_local_data_source.dart';
@@ -20,11 +22,16 @@ abstract class SyncRepository {
 class SyncRepositoryImpl implements SyncRepository {
   final FirebaseFirestore _firestore;
   final SettingsLocalDataSource _settingsLocalDataSource;
+  final EncryptionService _encryptionService;
   static const String EXPENSES_BOX = 'expenses';
   static const String CATEGORIES_BOX = 'categories';
   static const String PENDING_DELETIONS_BOX = 'pending_deletions';
 
-  SyncRepositoryImpl(this._firestore, this._settingsLocalDataSource);
+  SyncRepositoryImpl(
+    this._firestore,
+    this._settingsLocalDataSource,
+    this._encryptionService,
+  );
 
   Box<ExpenseModel> get _expensesBox => Hive.box<ExpenseModel>(EXPENSES_BOX);
   Box<CategoryModel> get _categoriesBox =>
@@ -116,6 +123,10 @@ class SyncRepositoryImpl implements SyncRepository {
   Future<void> syncExpenses() async {
     if (!await _isSyncEnabled()) {
       debugPrint("SyncRepository: Skipping syncExpenses - data sync disabled.");
+      return;
+    }
+    if (!_encryptionService.isReady) {
+      debugPrint("SyncRepository: Skipping syncExpenses - encryption not ready.");
       return;
     }
 
@@ -233,6 +244,12 @@ class SyncRepositoryImpl implements SyncRepository {
     if (!await _isSyncEnabled()) {
       debugPrint(
         "SyncRepository: Skipping fetchRemoteData - data sync disabled.",
+      );
+      return;
+    }
+    if (!_encryptionService.isReady) {
+      debugPrint(
+        "SyncRepository: Skipping fetchRemoteData - encryption not ready.",
       );
       return;
     }

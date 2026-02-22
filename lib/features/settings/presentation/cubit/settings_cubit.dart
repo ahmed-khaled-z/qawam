@@ -1,15 +1,22 @@
 import 'dart:ui';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../config/language/language_manager.dart';
 import '../../data/models/settings_model.dart';
+import '../../domain/entities/currency.dart';
 import '../../domain/use_cases/fetch_currencies_use_case.dart';
 import '../../domain/use_cases/fetch_settings_use_case.dart';
 import '../../domain/use_cases/save_settings_use_case.dart';
 import 'settings_state.dart';
 
-/// Cubit responsible for managing Settings state and business logic
+/// Cubit responsible for managing Settings state and business logic.
+///
+/// Initialization flow:
+/// 1. [loadSettings] is called once in [app.dart] via BlocProvider.
+/// 2. Settings are loaded from local cache first (instant) then remote syncs.
+/// 3. Each setter method updates state, saves locally, and syncs to remote.
 class SettingsCubit extends Cubit<SettingsState> {
   final FetchSettingsUseCase _fetchSettingsUseCase;
   final SaveSettingsUseCase _saveSettingsUseCase;
@@ -24,120 +31,156 @@ class SettingsCubit extends Cubit<SettingsState> {
        _fetchCurrenciesUseCase = fetchCurrenciesUseCase,
        super(const SettingsState());
 
-  /// Fetch settings and currencies on screen load
+  // ── Public API ─────────────────────────────────────────────────────────────
+
+  /// Load settings and currencies on app startup or screen open.
+  ///
+  /// Settings are fetched from local cache first (fast), then currencies
+  /// are loaded. A remote background sync happens automatically inside
+  /// the repository layer.
   Future<void> loadSettings() async {
     emit(state.copyWith(status: SettingsStatus.loading));
 
-    // Parallel fetch
-    final settingsFuture = _fetchSettingsUseCase.call();
-    final currenciesFuture = _fetchCurrenciesUseCase.call();
+    // Fetch settings (local-first) and currencies separately
+    // to avoid type mixing issues with Future.wait.
+    final settingsResult = await _fetchSettingsUseCase.call();
+    final currenciesResult = await _fetchCurrenciesUseCase.call();
 
-    final results = await Future.wait([settingsFuture, currenciesFuture]);
-    final settingsResult = results[0];
-    final currenciesResult = results[1];
+    SettingsModel loadedModel = SettingsModel.empty();
 
-    // Handle Settings Result
+    // ── Handle settings result ──────────────────────────────────────────────
     settingsResult.fold(
-      (exception) => emit(
-        state.copyWith(
-          status: SettingsStatus.error,
-          errorMessage: exception.toString(),
-        ),
-      ),
-      (settings) {
-        // We need to cast because Future.wait returns dynamic/Object types in mixed lists
-        // effectively, but here we know the types.
-        // Actually, let's just handle them carefully.
-        final model = SettingsModel.fromEntity(settings as dynamic);
-
-        // Settings loaded, now check currencies...
-        currenciesResult.fold(
-          (currException) {
-            // If currencies fail, we can still show settings but maybe with empty currencies?
-            // Or just log it. We'll proceed with empty currencies if fail,
-            // as the default list logic is in the repo layer anyway.
-            emit(
-              state.copyWith(
-                status: SettingsStatus.loaded,
-                settings: model,
-                errorMessage: null, // Don't block UI for this
-              ),
-            );
-          },
-          (currencies) {
-            // Both success
-            emit(
-              state.copyWith(
-                status: SettingsStatus.loaded,
-                settings: model,
-                currencies: currencies as dynamic,
-                errorMessage: null,
-              ),
-            );
-
-            // Apply language from saved settings
-            final savedLocale = Locale(model.language);
-            if (languageManager.locale != savedLocale) {
-              languageManager.setLocale(savedLocale);
-            }
-          },
+      (exception) {
+        debugPrint('[SettingsCubit] Failed to load settings: $exception');
+        // Keep default settings but mark as loaded so UI is not blocked.
+        emit(
+          state.copyWith(
+            status: SettingsStatus.loaded,
+            settings: SettingsModel.empty(),
+            errorMessage: exception.toString(),
+          ),
         );
+        return;
       },
+      (settings) {
+        loadedModel = SettingsModel.fromEntity(settings);
+      },
+    );
+
+    // ── Handle currencies result ────────────────────────────────────────────
+    List<Currency> currencies = const [];
+    currenciesResult.fold(
+      (exception) {
+        debugPrint('[SettingsCubit] Failed to load currencies: $exception');
+        // Non-fatal — proceed with empty list; UI shows no dropdown items.
+      },
+      (list) {
+        currencies = list;
+      },
+    );
+
+    // ── Emit loaded state ───────────────────────────────────────────────────
+    emit(
+      state.copyWith(
+        status: SettingsStatus.loaded,
+        settings: loadedModel,
+        currencies: currencies,
+        errorMessage: null,
+      ),
+    );
+
+    // ── Apply saved language globally ───────────────────────────────────────
+    _applyLanguage(loadedModel.language);
+
+    debugPrint(
+      '[SettingsCubit] Settings loaded: currency=${loadedModel.currency}, '
+      'lang=${loadedModel.language}, '
+      'sync=${loadedModel.dataSyncEnabled}, '
+      'notifications=${loadedModel.notificationsEnabled}, '
+      'monthStart=${loadedModel.monthStartDay}',
     );
   }
 
-  // ... (rest of methods: setCurrency, etc. - mostly unchanged except for injection)
+  // ── Setters ────────────────────────────────────────────────────────────────
 
-  /// Update currency and persist
+  /// Update the active currency and persist.
   Future<void> setCurrency(String currency) async {
     final updated = state.settings.copyWith(currency: currency);
     await _saveAndEmit(updated);
   }
 
-  /// Update language, apply globally, and persist
+  /// Update the app language, apply globally, and persist.
   Future<void> setLanguage(String langCode) async {
     final updated = state.settings.copyWith(language: langCode);
-    languageManager.setLocale(Locale(langCode));
+    _applyLanguage(langCode);
     await _saveAndEmit(updated);
   }
 
-  /// Toggle data sync
+  /// Toggle data sync preference.
   Future<void> setDataSync(bool enabled) async {
     final updated = state.settings.copyWith(dataSyncEnabled: enabled);
     await _saveAndEmit(updated);
   }
 
-  /// Toggle notifications
+  /// Toggle notification preference.
   Future<void> setNotifications(bool enabled) async {
     final updated = state.settings.copyWith(notificationsEnabled: enabled);
     await _saveAndEmit(updated);
   }
 
-  /// Set month start day
+  /// Update the month start day (1–28).
   Future<void> setMonthStartDay(int day) async {
     final updated = state.settings.copyWith(monthStartDay: day);
     await _saveAndEmit(updated);
   }
 
+  // ── Private helpers ────────────────────────────────────────────────────────
+
+  /// Emit optimistic state immediately, then save and confirm.
+  ///
+  /// The UI updates instantly on user interaction. If saving fails
+  /// (which is very unlikely since we save locally first), we report
+  /// the error without reverting to avoid a jarring UX.
   Future<void> _saveAndEmit(SettingsModel model) async {
+    // Optimistic UI update — show the change immediately.
     emit(state.copyWith(settings: model, status: SettingsStatus.saving));
 
     final result = await _saveSettingsUseCase.call(model);
 
     result.fold(
-      (exception) => emit(
-        state.copyWith(
-          status: SettingsStatus.error,
-          errorMessage: exception.toString(),
-        ),
-      ),
-      (saved) => emit(
-        state.copyWith(
-          status: SettingsStatus.saved,
-          settings: SettingsModel.fromEntity(saved),
-          errorMessage: null,
-        ),
-      ),
+      (exception) {
+        debugPrint('[SettingsCubit] Save failed: $exception');
+        emit(
+          state.copyWith(
+            // Keep the model the user selected (don't revert).
+            settings: model,
+            status: SettingsStatus.error,
+            errorMessage: exception.toString(),
+          ),
+        );
+      },
+      (saved) {
+        emit(
+          state.copyWith(
+            status: SettingsStatus.saved,
+            settings: SettingsModel.fromEntity(saved),
+            errorMessage: null,
+          ),
+        );
+        debugPrint('[SettingsCubit] Settings saved: ${model.toJson()}');
+      },
     );
+  }
+
+  /// Apply a language code to the global [LanguageManager].
+  void _applyLanguage(String langCode) {
+    try {
+      final newLocale = Locale(langCode);
+      if (languageManager.locale != newLocale) {
+        languageManager.setLocale(newLocale);
+      }
+    } catch (e) {
+      debugPrint('[SettingsCubit] Failed to apply language "$langCode": $e');
+    }
   }
 }

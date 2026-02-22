@@ -12,16 +12,21 @@ import 'config/language/language_manager.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
+  // 1. Load environment variables
   await dotenv.load(fileName: '.env');
 
+  // 2. Initialize Firebase
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
-  // Initialize managers
+  // 3. Initialize global managers (theme, auth, language)
+  //    These MUST complete before runApp so the UI has correct initial state.
   themeManager = await ThemeManager.loadTheme();
   authManager = await AuthManager.loadUser();
   await LanguageManager.create();
 
-  Future.wait([ServiceLocator().setup()]).then((value) {
-    runApp(const App());
-  });
+  // 4. Set up dependency injection (Hive, Firestore, all features)
+  await ServiceLocator().setup();
+
+  // 5. Launch the app — all dependencies are ready
+  runApp(const App());
 }

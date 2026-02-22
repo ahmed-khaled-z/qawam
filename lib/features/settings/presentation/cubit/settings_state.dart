@@ -36,15 +36,22 @@ class SettingsState {
     this.currencies = const [],
   });
 
+  /// Use a sentinel so that copyWith(errorMessage: null) actually clears it.
+  static const _clearError = Object();
+
   SettingsState copyWith({
     SettingsStatus? status,
-    String? errorMessage,
+    // Pass [null] explicitly to clear the error. Use [_clearError] internally.
+    Object? errorMessage = _clearError,
     SettingsModel? settings,
     List<Currency>? currencies,
   }) {
     return SettingsState(
       status: status ?? this.status,
-      errorMessage: errorMessage ?? this.errorMessage,
+      // If caller passed null → clear error. If not provided → keep current.
+      errorMessage: errorMessage == _clearError
+          ? this.errorMessage
+          : errorMessage as String?,
       settings: settings ?? this.settings,
       currencies: currencies ?? this.currencies,
     );

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 import 'package:qawam/features/bottom_nav/presentation/screens/bottom_nav_screen.dart';
+import 'package:qawam/features/device_authorization/presentation/screens/device_authorization_approve_screen.dart';
+import 'package:qawam/features/device_authorization/presentation/screens/device_authorization_waiting_screen.dart';
 import 'package:qawam/features/expenses/presentation/screens/expenses_screen.dart';
 import 'package:qawam/features/feature_request/presentation/screens/suggest_feature_screen.dart';
 import 'package:qawam/features/login/presentation/screens/login_screen.dart';
@@ -55,6 +57,19 @@ class AppRouter {
       case SuggestFeatureScreen.routeName:
         return MaterialPageRoute(
           builder: (_) => const SuggestFeatureScreen(),
+          settings: settings,
+        );
+      case DeviceAuthorizationWaitingScreen.routeName: {
+        final args = settings.arguments as Map<String, dynamic>?;
+        final userId = args?['userId'] as String? ?? '';
+        return MaterialPageRoute(
+          builder: (_) => DeviceAuthorizationWaitingScreen(userId: userId),
+          settings: settings,
+        );
+      }
+      case DeviceAuthorizationApproveScreen.routeName:
+        return MaterialPageRoute(
+          builder: (_) => const DeviceAuthorizationApproveScreen(),
           settings: settings,
         );
       default:

@@ -13,6 +13,7 @@ import '../../../profile/presentation/cubit/profile_cubit.dart';
 import '../../../profile/presentation/cubit/profile_state.dart';
 import '../../../profile/presentation/screens/profile_screen.dart';
 import '../../../settings/presentation/screens/settings_screen.dart';
+import '../../../device_authorization/presentation/screens/device_authorization_approve_screen.dart';
 import '../../../feature_request/presentation/screens/suggest_feature_screen.dart';
 import '../../../../../../core/sync/sync_service.dart';
 import '../../../../../../injection_container.dart';
@@ -28,7 +29,7 @@ class _MoreScreenState extends State<MoreScreen> with TickerProviderStateMixin {
   late final AnimationController _staggerController;
   late final List<Animation<double>> _itemAnimations;
 
-  static const _itemCount = 7;
+  static const _itemCount = 8;
 
   @override
   void initState() {
@@ -143,6 +144,15 @@ class _MoreScreenState extends State<MoreScreen> with TickerProviderStateMixin {
                         label: context.tr('more_settings'),
                         onTap: () => AppRouter.to(SettingsScreen.routeName),
                       ),
+                      _divider(),
+                      _buildAnimatedItem(
+                        index: 6,
+                        icon: Icons.phonelink_setup_rounded,
+                        color: const Color(0xFF0D7377),
+                        label: 'Authorize devices',
+                        onTap: () =>
+                            AppRouter.to(DeviceAuthorizationApproveScreen.routeName),
+                      ),
                     ],
                   ),
                   const SizedBox(height: 16),
@@ -152,7 +162,7 @@ class _MoreScreenState extends State<MoreScreen> with TickerProviderStateMixin {
                     context,
                     children: [
                       _buildAnimatedItem(
-                        index: 6,
+                        index: 7,
                         icon: Icons.logout_rounded,
                         color: const Color(0xFFE53935),
                         label: context.tr('more_logout'),
