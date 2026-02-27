@@ -2,7 +2,6 @@ import 'package:dartz/dartz.dart';
 import '../../domain/repositories/home_repository.dart';
 import '../data_sources/remote/home_remote_data_source.dart';
 
-
 class HomeRepositoryImpl implements HomeRepository {
   final HomeRemoteDataSource remoteDataSource;
 
@@ -16,6 +15,4 @@ class HomeRepositoryImpl implements HomeRepository {
       return Left(exception);
     }
   }
-
 }
-

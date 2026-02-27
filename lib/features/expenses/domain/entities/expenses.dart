@@ -1,8 +1,5 @@
 class Expenses {
   final String? data;
 
-  const Expenses({
-    required this.data,
-  });
-
+  const Expenses({required this.data});
 }

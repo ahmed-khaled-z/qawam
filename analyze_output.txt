@@ -1,0 +1,55 @@
+﻿Analyzing lib...                                                
+
+   info - The constant name 'EXPENSES_BOX' isn't a lowerCamelCase identifier - lib\core\sync\sync_repository.dart:26:23 - constant_identifier_names
+   info - The constant name 'CATEGORIES_BOX' isn't a lowerCamelCase identifier - lib\core\sync\sync_repository.dart:27:23 - constant_identifier_names
+   info - The constant name 'PENDING_DELETIONS_BOX' isn't a lowerCamelCase identifier - lib\core\sync\sync_repository.dart:28:23 - constant_identifier_names
+   info - The constant name 'BOX_NAME' isn't a lowerCamelCase identifier - lib\features\categories\data\data_sources\local\categories_local_data_source.dart:14:23 - constant_identifier_names
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\categories\presentation\screens\categories_screen.dart:317:42 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\categories\presentation\screens\categories_screen.dart:350:54 - deprecated_member_use
+   info - 'value' is deprecated and shouldn't be used. Use component accessors like .r or .g, or toARGB32 for an explicit conversion - lib\features\categories\presentation\widgets\add_category_sheet.dart:63:35 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\categories\presentation\widgets\add_category_sheet.dart:135:51 - deprecated_member_use
+   info - 'value' is deprecated and shouldn't be used. Use component accessors like .r or .g, or toARGB32 for an explicit conversion - lib\features\categories\presentation\widgets\add_category_sheet.dart:165:42 - deprecated_member_use
+   info - 'value' is deprecated and shouldn't be used. Use component accessors like .r or .g, or toARGB32 for an explicit conversion - lib\features\categories\presentation\widgets\add_category_sheet.dart:168:59 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\expenses\presentation\screens\expenses_screen.dart:170:40 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\expenses\presentation\screens\expenses_screen.dart:285:38 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\expenses\presentation\screens\expenses_screen.dart:299:52 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\expenses\presentation\widgets\filter_expenses_sheet.dart:201:56 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\expenses\presentation\widgets\filter_expenses_sheet.dart:264:50 - deprecated_member_use
+   info - The constant name 'BOX_NAME' isn't a lowerCamelCase identifier - lib\features\home\data\data_sources\local\expenses_local_data_source_impl.dart:6:23 - constant_identifier_names
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\home\presentation\widgets\add_expense_sheet.dart:229:45 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\home\presentation\widgets\add_expense_sheet.dart:242:49 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\home\presentation\widgets\recent_expenses_list.dart:82:36 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\home\presentation\widgets\recent_expenses_list.dart:93:48 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\home\presentation\widgets\spending_summary_card.dart:73:32 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\home\presentation\widgets\spending_summary_card.dart:85:28 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\home\presentation\widgets\welcome_card.dart:27:44 - deprecated_member_use
+   info - The imported package 'collection' isn't a dependency of the importing package - lib\features\statistics\domain\use_cases\get_statistics_use_case.dart:2:8 - depend_on_referenced_packages
+   info - Statements in an if should be enclosed in a block - lib\features\statistics\domain\use_cases\get_statistics_use_case.dart:328:9 - curly_braces_in_flow_control_structures
+   info - Statements in an if should be enclosed in a block - lib\features\statistics\domain\use_cases\get_statistics_use_case.dart:330:9 - curly_braces_in_flow_control_structures
+   info - Statements in an if should be enclosed in a block - lib\features\statistics\domain\use_cases\get_statistics_use_case.dart:332:9 - curly_braces_in_flow_control_structures
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\statistics\presentation\widgets\category_pie_chart.dart:121:32 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\statistics\presentation\widgets\category_pie_chart.dart:176:33 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\statistics\presentation\widgets\daily_trend_chart_widget.dart:45:38 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\statistics\presentation\widgets\daily_trend_chart_widget.dart:99:47 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\statistics\presentation\widgets\daily_trend_chart_widget.dart:100:47 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\statistics\presentation\widgets\daily_trend_chart_widget.dart:111:46 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\statistics\presentation\widgets\highest_single_expense_widget.dart:51:49 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\statistics\presentation\widgets\highest_single_expense_widget.dart:59:54 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\statistics\presentation\widgets\last_six_months_chart.dart:44:38 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\statistics\presentation\widgets\last_six_months_chart.dart:102:46 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\statistics\presentation\widgets\monthly_overview_card.dart:59:32 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\statistics\presentation\widgets\monthly_overview_card.dart:93:34 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\statistics\presentation\widgets\monthly_overview_card.dart:95:53 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\statistics\presentation\widgets\stat_card.dart:27:44 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\statistics\presentation\widgets\stat_card.dart:33:33 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\statistics\presentation\widgets\stat_card.dart:38:47 - deprecated_member_use
+
+flutter : 43 issues found. (ran in 6.2s)
+At line:1 char:1
++ flutter analyze lib/ 2>&1 | Out-File -Encoding utf8 
+C:\Users\ahmed\pr ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (43 issues found. (ran in  
+   6.2s):String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 

@@ -1,6 +1,5 @@
 import 'package:dartz/dartz.dart';
 
-
 abstract class ExpensesRemoteDataSource {
   Future<Unit> callApi();
 }
@@ -13,8 +12,4 @@ class ExpensesRemoteDataSourceImpl implements ExpensesRemoteDataSource {
     // send api request here
     return Future.value(unit);
   }
-
 }
-
-
-  

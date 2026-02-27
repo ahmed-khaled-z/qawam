@@ -1,6 +1,5 @@
 import 'package:dartz/dartz.dart';
 
-
 abstract class StatisticsLocalDataSource {
   Future<Unit> getFromLocalDataBase();
 }
@@ -13,6 +12,4 @@ class StatisticsLocalDataSourceImpl implements StatisticsLocalDataSource {
     // send api request here
     return Future.value(unit);
   }
-
 }
-  

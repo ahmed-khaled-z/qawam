@@ -2,7 +2,6 @@ import 'package:dartz/dartz.dart';
 import '../../domain/repositories/bottom_nav_repository.dart';
 import '../data_sources/remote/bottom_nav_remote_data_source.dart';
 
-
 class BottomNavRepositoryImpl implements BottomNavRepository {
   final BottomNavRemoteDataSource remoteDataSource;
 
@@ -16,6 +15,4 @@ class BottomNavRepositoryImpl implements BottomNavRepository {
       return Left(exception);
     }
   }
-
 }
-

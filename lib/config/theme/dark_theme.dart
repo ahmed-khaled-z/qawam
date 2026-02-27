@@ -7,4 +7,3 @@ final ThemeData darkTheme = ThemeData(
   scaffoldBackgroundColor: Colors.black,
   // Add other properties like AppBarTheme, ButtonTheme, etc.
 );
-

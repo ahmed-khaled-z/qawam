@@ -1,7 +1,6 @@
 import 'package:dartz/dartz.dart';
 import '../repositories/home_repository.dart';
 
-
 class HomeUseCase {
   final HomeRepository repository;
 
@@ -11,4 +10,3 @@ class HomeUseCase {
     return await repository.callApi();
   }
 }
-

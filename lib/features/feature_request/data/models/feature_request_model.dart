@@ -31,15 +31,18 @@ class FeatureRequestModel {
   }
 
   FeatureRequest toEntity() => FeatureRequest(
-        id: id,
-        userId: userId,
-        message: message,
-        additionalNotes: additionalNotes,
-        createdAt: createdAt,
-        status: status,
-      );
+    id: id,
+    userId: userId,
+    message: message,
+    additionalNotes: additionalNotes,
+    createdAt: createdAt,
+    status: status,
+  );
 
-  factory FeatureRequestModel.fromFirestore(Map<String, dynamic> data, String id) {
+  factory FeatureRequestModel.fromFirestore(
+    Map<String, dynamic> data,
+    String id,
+  ) {
     final createdAt = data['createdAt'];
     return FeatureRequestModel(
       id: id,
@@ -54,10 +57,10 @@ class FeatureRequestModel {
   }
 
   Map<String, dynamic> toFirestore() => {
-        'userId': userId,
-        'message': message,
-        'additionalNotes': additionalNotes,
-        'createdAt': Timestamp.fromDate(createdAt),
-        'status': status.value,
-      };
+    'userId': userId,
+    'message': message,
+    'additionalNotes': additionalNotes,
+    'createdAt': Timestamp.fromDate(createdAt),
+    'status': status.value,
+  };
 }

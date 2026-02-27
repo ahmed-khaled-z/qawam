@@ -75,10 +75,12 @@ class _SuggestFeatureBodyState extends State<_SuggestFeatureBody> {
                       const SizedBox(height: 12),
                       BlocBuilder<FeatureRequestCubit, FeatureRequestState>(
                         buildWhen: (a, b) =>
-                            a.requests != b.requests || a.submitStatus != b.submitStatus,
+                            a.requests != b.requests ||
+                            a.submitStatus != b.submitStatus,
                         builder: (context, state) {
                           if (state.requests.isEmpty &&
-                              state.submitStatus != FeatureRequestSubmitStatus.loading) {
+                              state.submitStatus !=
+                                  FeatureRequestSubmitStatus.loading) {
                             return _buildEmptyRequests(context);
                           }
                           return _buildRequestsList(context, state.requests);
@@ -101,7 +103,9 @@ class _SuggestFeatureBodyState extends State<_SuggestFeatureBody> {
       elevation: 0,
       leading: IconButton(
         icon: Icon(
-          isRTL ? Icons.arrow_forward_ios_rounded : Icons.arrow_back_ios_rounded,
+          isRTL
+              ? Icons.arrow_forward_ios_rounded
+              : Icons.arrow_back_ios_rounded,
           color: const Color(0xFF1A1A2E),
           size: 20,
         ),
@@ -154,7 +158,8 @@ class _SuggestFeatureBodyState extends State<_SuggestFeatureBody> {
         }
       },
       builder: (context, state) {
-        final isLoading = state.submitStatus == FeatureRequestSubmitStatus.loading;
+        final isLoading =
+            state.submitStatus == FeatureRequestSubmitStatus.loading;
         final canSubmit = state.canSubmit && !isLoading;
 
         return Container(
@@ -245,12 +250,12 @@ class _SuggestFeatureBodyState extends State<_SuggestFeatureBody> {
                           ? () {
                               if (_formKey.currentState?.validate() ?? false) {
                                 context.read<FeatureRequestCubit>().submit(
-                                      message: _messageController.text,
-                                      additionalNotes:
-                                          _notesController.text.trim().isEmpty
-                                              ? null
-                                              : _notesController.text,
-                                    );
+                                  message: _messageController.text,
+                                  additionalNotes:
+                                      _notesController.text.trim().isEmpty
+                                      ? null
+                                      : _notesController.text,
+                                );
                               }
                             }
                           : null,
@@ -313,10 +318,7 @@ class _SuggestFeatureBodyState extends State<_SuggestFeatureBody> {
           const SizedBox(height: 12),
           Text(
             context.tr('suggest_no_requests'),
-            style: TextStyle(
-              fontSize: 14,
-              color: Colors.grey.shade600,
-            ),
+            style: TextStyle(fontSize: 14, color: Colors.grey.shade600),
             textAlign: TextAlign.center,
           ),
         ],
@@ -324,7 +326,10 @@ class _SuggestFeatureBodyState extends State<_SuggestFeatureBody> {
     );
   }
 
-  Widget _buildRequestsList(BuildContext context, List<FeatureRequest> requests) {
+  Widget _buildRequestsList(
+    BuildContext context,
+    List<FeatureRequest> requests,
+  ) {
     return ListView.separated(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
@@ -416,7 +421,10 @@ class _RequestCard extends StatelessWidget {
                 ),
                 const SizedBox(width: 8),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     color: color.withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(20),
@@ -438,10 +446,7 @@ class _RequestCard extends StatelessWidget {
               const SizedBox(height: 8),
               Text(
                 request.additionalNotes!,
-                style: TextStyle(
-                  fontSize: 12,
-                  color: Colors.grey.shade600,
-                ),
+                style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
               ),
@@ -449,10 +454,7 @@ class _RequestCard extends StatelessWidget {
             const SizedBox(height: 8),
             Text(
               _formatDate(request.createdAt),
-              style: TextStyle(
-                fontSize: 11,
-                color: Colors.grey.shade500,
-              ),
+              style: TextStyle(fontSize: 11, color: Colors.grey.shade500),
             ),
           ],
         ),

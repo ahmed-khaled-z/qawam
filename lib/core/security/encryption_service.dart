@@ -1,38 +1,38 @@
 import 'dart:convert';
 
-import 'package:crypto/crypto.dart';
+import 'package:argon2/argon2.dart';
 import 'package:encrypt/encrypt.dart' as encrypt;
 import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:pointycastle/asymmetric/api.dart';
-import 'package:uuid/uuid.dart';
 
 import 'crypto_repository.dart';
-import 'rsa_key_utils.dart';
 
 /// Lifecycle state of the encryption service.
-enum EncryptionState {
-  uninitialized,
-  bootstrap,
-  awaitingAuthorization,
-  ready,
-  failed,
-  needsMigration,
-}
+enum EncryptionState { uninitialized, ready, failed }
 
-/// E2EE encryption service with multi-device key wrapping.
-/// - Bootstrap: first device generates RSA + MEK, uploads to Firebase.
-/// - New device: creates pending request, waits for authorized device to wrap MEK.
-/// - Returning device: loads MEK from secure storage (no Firebase).
+/// AES-256 encryption service with Firebase-synced MEK.
+///
+/// **How multi-device works (no device authorization needed):**
+/// 1. First login: generate random MEK, derive wrapping key from user UID + salt
+///    via Argon2id, wrap MEK, upload wrapped MEK + salt to Firebase.
+/// 2. New device login: download wrapped MEK + salt, derive same wrapping key
+///    from UID + salt, unwrap MEK, store in secure storage.
+/// 3. Returning device: load MEK from secure storage (offline capable).
+///
+/// The user's UID is available after Google Sign-In and is stable across devices.
+/// The wrapping key is never stored — it's derived at runtime.
 class EncryptionService {
   EncryptionService({CryptoRepository? cryptoRepository})
-      : _cryptoRepository = cryptoRepository;
+    : _cryptoRepository = cryptoRepository;
 
   final CryptoRepository? _cryptoRepository;
   static const _storageKeyMek = 'qawam_mek';
-  static const _storageKeyPrivateKey = 'qawam_private_key';
-  static const _storageKeyDeviceId = 'qawam_device_id';
   static const _storageKeyLegacyKey = 'qawam_encryption_key';
+
+  // Argon2id KDF parameters for wrapping key derivation.
+  static const int _argon2Iterations = 3;
+  static const int _argon2MemoryPowerOf2 = 16; // 64 MB
+  static const int _argon2Lanes = 2;
 
   final _storage = const FlutterSecureStorage();
 
@@ -42,6 +42,10 @@ class EncryptionService {
   /// True when encrypt/decrypt can be used (MEK is loaded).
   bool get isReady => _state == EncryptionState.ready;
 
+  /// Raw MEK bytes (for recovery blob creation). Null if not ready.
+  Uint8List? get mekBytes =>
+      _state == EncryptionState.ready ? _key.bytes : null;
+
   /// Legacy key (base64) for migration; only set when old key exists and new MEK not yet.
   String? _legacyKeyBase64;
 
@@ -49,7 +53,7 @@ class EncryptionService {
   late encrypt.Encrypter _encrypter;
 
   /// Initialize from secure storage only. Does not touch Firebase.
-  /// Call [ensureReady] after login to bootstrap or join as new device.
+  /// Call [ensureReady] after login to bootstrap or fetch from Firebase.
   Future<void> init() async {
     try {
       final mek = await _storage.read(key: _storageKeyMek);
@@ -72,7 +76,9 @@ class EncryptionService {
           encrypt.AES(_key, mode: encrypt.AESMode.cbc),
         );
         _state = EncryptionState.ready;
-        debugPrint('EncryptionService: Loaded legacy key (Ready, migration available).');
+        debugPrint(
+          'EncryptionService: Loaded legacy key (Ready, migration available).',
+        );
         return;
       }
 
@@ -88,8 +94,12 @@ class EncryptionService {
   /// Returns true if this install has a legacy device-bound key (pre-E2EE).
   bool get hasLegacyKey => _legacyKeyBase64 != null;
 
-  /// Call after login with current user id. Bootstraps first device, or starts new-device flow.
-  /// Requires [CryptoRepository] to be registered.
+  /// Call after login with current user's UID.
+  ///
+  /// Flow:
+  /// 1. If already ready (MEK in secure storage), return immediately.
+  /// 2. Try to download wrapped MEK from Firebase → unwrap → store.
+  /// 3. If no wrapped MEK exists in Firebase, generate new MEK → wrap → upload.
   Future<void> ensureReady(String userId) async {
     if (_state == EncryptionState.ready) return;
     final repo = _cryptoRepository;
@@ -99,26 +109,34 @@ class EncryptionService {
     }
 
     try {
-      final deviceId = await _storage.read(key: _storageKeyDeviceId);
-      final devices = await repo.getDevices(userId);
+      // Try to fetch existing wrapped MEK from Firebase
+      final blob = await repo.getWrappedMek(userId);
 
-      if (deviceId != null && devices.any((d) => d.deviceId == deviceId)) {
-        final device = await repo.getDevice(userId, deviceId);
-        if (device?.wrappedMekBase64 != null) {
-          await _unwrapMekAndStore(device!.wrappedMekBase64!);
-          _state = EncryptionState.ready;
-          debugPrint('EncryptionService: Unwrapped MEK for returning device (Ready).');
+      if (blob != null) {
+        // Derive wrapping key from UID + stored salt
+        final salt = base64Url.decode(blob.saltBase64);
+        final wrappingKey = _deriveWrappingKey(userId, salt);
+
+        // Unwrap MEK
+        final wrappedMekBytes = base64Url.decode(blob.wrappedMekBase64);
+        final mekBytes = _unwrapMek(wrappedMekBytes, wrappingKey);
+
+        if (mekBytes != null) {
+          await _storeMekAndInit(mekBytes);
+          debugPrint(
+            'EncryptionService: Downloaded and unwrapped MEK from Firebase (Ready).',
+          );
           return;
+        } else {
+          debugPrint(
+            'EncryptionService: Failed to unwrap MEK from Firebase. '
+            'Generating new MEK.',
+          );
         }
       }
 
-      if (devices.isEmpty) {
-        await _bootstrap(userId, repo);
-        return;
-      }
-
-      _state = EncryptionState.awaitingAuthorization;
-      debugPrint('EncryptionService: New device, awaiting authorization.');
+      // No wrapped MEK in Firebase — this is the first device. Bootstrap.
+      await _bootstrap(userId, repo);
     } catch (e) {
       debugPrint('EncryptionService: ensureReady failed: $e');
       _state = EncryptionState.failed;
@@ -126,39 +144,30 @@ class EncryptionService {
     }
   }
 
+  /// Generate new MEK, wrap with UID-derived key, upload to Firebase.
   Future<void> _bootstrap(String userId, CryptoRepository repo) async {
-    _state = EncryptionState.bootstrap;
     try {
-      final keyPair = generateRsaKeyPair();
+      // Generate random 256-bit MEK
       final mekBytes = encrypt.Key.fromSecureRandom(32).bytes;
-      final mekBase64 = base64Url.encode(mekBytes);
-      final deviceId = const Uuid().v4();
 
-      final publicKeyPem = encodePublicKeyToPem(keyPair.publicKey);
-      final privateKeyPem = encodePrivateKeyToPem(
-        keyPair.privateKey,
-        BigInt.from(65537),
-      );
+      // Generate random salt for KDF
+      final salt = encrypt.Key.fromSecureRandom(32).bytes;
 
-      final wrappedMek = _wrapMekWithPublicKey(mekBytes, keyPair.publicKey);
+      // Derive wrapping key
+      final wrappingKey = _deriveWrappingKey(userId, salt);
 
-      await _storage.write(key: _storageKeyDeviceId, value: deviceId);
-      await _storage.write(key: _storageKeyPrivateKey, value: privateKeyPem);
-      await _storage.write(key: _storageKeyMek, value: mekBase64);
+      // Wrap MEK
+      final wrappedMek = _wrapMek(mekBytes, wrappingKey);
 
-      await repo.setDevice(
+      // Upload to Firebase
+      await repo.setWrappedMek(
         userId,
-        deviceId,
-        publicKeyPem: publicKeyPem,
-        wrappedMekBase64: wrappedMek,
-        deviceName: _defaultDeviceName(),
+        wrappedMekBase64: base64Url.encode(wrappedMek),
+        saltBase64: base64Url.encode(salt),
       );
 
-      _key = encrypt.Key(Uint8List.fromList(mekBytes));
-      _encrypter = encrypt.Encrypter(
-        encrypt.AES(_key, mode: encrypt.AESMode.cbc),
-      );
-      _state = EncryptionState.ready;
+      // Store MEK locally
+      await _storeMekAndInit(Uint8List.fromList(mekBytes));
       debugPrint('EncryptionService: Bootstrap done (Ready).');
     } catch (e) {
       debugPrint('EncryptionService: Bootstrap failed: $e');
@@ -167,110 +176,66 @@ class EncryptionService {
     }
   }
 
-  /// Start new-device flow: generate keypair, add pending device, return verification code.
-  /// [onApproved] is called when this device receives wrapped MEK and becomes ready.
-  Future<String> startNewDeviceAuthorization(String userId) async {
-    final repo = _cryptoRepository;
-    if (repo == null) throw StateError('CryptoRepository not set');
-
-    final keyPair = generateRsaKeyPair();
-    final deviceId = const Uuid().v4();
-    final publicKeyPem = encodePublicKeyToPem(keyPair.publicKey);
-    final privateKeyPem = encodePrivateKeyToPem(
-      keyPair.privateKey,
-      BigInt.from(65537),
+  /// Derive a 256-bit wrapping key from user UID and salt using Argon2id.
+  Uint8List _deriveWrappingKey(String userId, Uint8List salt) {
+    final argon2Params = Argon2Parameters(
+      Argon2Parameters.ARGON2_id,
+      salt,
+      iterations: _argon2Iterations,
+      memoryPowerOf2: _argon2MemoryPowerOf2,
+      lanes: _argon2Lanes,
+      version: Argon2Parameters.ARGON2_VERSION_13,
     );
 
-    await _storage.write(key: _storageKeyDeviceId, value: deviceId);
-    await _storage.write(key: _storageKeyPrivateKey, value: privateKeyPem);
+    final generator = Argon2BytesGenerator();
+    generator.init(argon2Params);
 
-    await repo.addPendingDevice(
-      userId,
-      deviceId,
-      publicKeyPem: publicKeyPem,
-      deviceName: _defaultDeviceName(),
+    final inputBytes = Uint8List.fromList(utf8.encode(userId));
+    final result = Uint8List(32);
+    generator.generateBytes(inputBytes, result, 0, result.length);
+
+    return result;
+  }
+
+  /// AES-wrap (AES-CBC encrypt) the MEK with the wrapping key.
+  /// Format: IV (16 bytes) + ciphertext.
+  Uint8List _wrapMek(Uint8List mekBytes, Uint8List wrappingKey) {
+    final key = encrypt.Key(wrappingKey);
+    final encrypter = encrypt.Encrypter(
+      encrypt.AES(key, mode: encrypt.AESMode.cbc),
     );
-
-    _pendingPrivateKeyPem = privateKeyPem;
-    _pendingDeviceId = deviceId;
-    return _verificationCodeFromPublicKey(publicKeyPem);
+    final iv = encrypt.IV.fromSecureRandom(16);
+    final encrypted = encrypter.encryptBytes(mekBytes, iv: iv);
+    return Uint8List.fromList([...iv.bytes, ...encrypted.bytes]);
   }
 
-  String? _pendingPrivateKeyPem;
-  String? _pendingDeviceId;
-
-  /// Derive 6-digit verification code from public key fingerprint.
-  String _verificationCodeFromPublicKey(String publicKeyPem) {
-    final bytes = utf8.encode(publicKeyPem);
-    final digest = sha256.convert(bytes).bytes;
-    final hex = digest.map((b) => b.toRadixString(16).padLeft(2, '0')).join();
-    final num = BigInt.parse(hex.substring(0, 12), radix: 16);
-    return (num % BigInt.from(1000000)).toString().padLeft(6, '0');
-  }
-
-  /// Watch for this device to be authorized; when wrappedMEK appears, unwrap and set ready.
-  Stream<EncryptionState> watchAuthorization(String userId) async* {
-    final repo = _cryptoRepository;
-    final deviceId = _pendingDeviceId;
-    final privateKeyPem = _pendingPrivateKeyPem;
-    if (repo == null || deviceId == null || privateKeyPem == null) {
-      yield _state;
-      return;
-    }
-
-    await for (final snapshot in repo.watchDevice(userId, deviceId)) {
-      if (!snapshot.exists) continue;
-      final data = snapshot.data();
-      final wrapped = data?['wrappedMEK'] as String?;
-      if (wrapped == null || wrapped.isEmpty) continue;
-
-      try {
-        await _unwrapMekWithPrivateKey(wrapped, privateKeyPem);
-        _state = EncryptionState.ready;
-        _pendingPrivateKeyPem = null;
-        _pendingDeviceId = null;
-        yield _state;
-        return;
-      } catch (e) {
-        debugPrint('EncryptionService: Unwrap on approval failed: $e');
-      }
+  /// AES-unwrap the MEK with the wrapping key. Returns null on failure.
+  Uint8List? _unwrapMek(Uint8List wrappedBytes, Uint8List wrappingKey) {
+    if (wrappedBytes.length < 32) return null; // IV(16) + at least 16 bytes
+    try {
+      final iv = encrypt.IV(Uint8List.sublistView(wrappedBytes, 0, 16));
+      final cipherBytes = Uint8List.sublistView(wrappedBytes, 16);
+      final key = encrypt.Key(wrappingKey);
+      final encrypter = encrypt.Encrypter(
+        encrypt.AES(key, mode: encrypt.AESMode.cbc),
+      );
+      final encrypted = encrypt.Encrypted(Uint8List.fromList(cipherBytes));
+      return Uint8List.fromList(encrypter.decryptBytes(encrypted, iv: iv));
+    } catch (e) {
+      debugPrint('EncryptionService: _unwrapMek failed: $e');
+      return null;
     }
   }
 
-  Future<void> _unwrapMekAndStore(String wrappedMekBase64) async {
-    final privateKeyPem = await _storage.read(key: _storageKeyPrivateKey);
-    if (privateKeyPem == null) throw StateError('No private key in storage');
-    await _unwrapMekWithPrivateKey(wrappedMekBase64, privateKeyPem);
-  }
-
-  Future<void> _unwrapMekWithPrivateKey(String wrappedMekBase64, String privateKeyPem) async {
-    final key = parseKeyFromPem(privateKeyPem);
-    if (key is! RSAPrivateKey) throw StateError('Expected private key');
-    final enc = encrypt.Encrypter(encrypt.RSA(
-      privateKey: key,
-      encoding: encrypt.RSAEncoding.OAEP,
-      digest: encrypt.RSADigest.SHA256,
-    ));
-    final encrypted = encrypt.Encrypted.fromBase64(wrappedMekBase64);
-    final mekBytes = Uint8List.fromList(enc.decryptBytes(encrypted));
+  /// Store MEK in secure storage and initialize the AES encrypter.
+  Future<void> _storeMekAndInit(Uint8List mekBytes) async {
     final mekBase64 = base64Url.encode(mekBytes);
     await _storage.write(key: _storageKeyMek, value: mekBase64);
     _key = encrypt.Key(mekBytes);
-    _encrypter = encrypt.Encrypter(encrypt.AES(_key, mode: encrypt.AESMode.cbc));
-  }
-
-  String _wrapMekWithPublicKey(Uint8List mekBytes, RSAPublicKey publicKey) {
-    final enc = encrypt.Encrypter(encrypt.RSA(
-      publicKey: publicKey,
-      encoding: encrypt.RSAEncoding.OAEP,
-      digest: encrypt.RSADigest.SHA256,
-    ));
-    final encrypted = enc.encryptBytes(mekBytes);
-    return base64.encode(encrypted.bytes);
-  }
-
-  String _defaultDeviceName() {
-    return 'Device ${DateTime.now().toIso8601String().substring(0, 10)}';
+    _encrypter = encrypt.Encrypter(
+      encrypt.AES(_key, mode: encrypt.AESMode.cbc),
+    );
+    _state = EncryptionState.ready;
   }
 
   /// Encrypts a double value. Returns Base64 string: IV:CIPHERTEXT.
@@ -300,30 +265,45 @@ class EncryptionService {
 
   bool isEncrypted(String value) => value.contains(':');
 
-  /// Cancel pending authorization and clear pending state.
-  void cancelAuthorization() {
-    _pendingPrivateKeyPem = null;
-    _pendingDeviceId = null;
-    if (_state == EncryptionState.awaitingAuthorization) {
-      _state = EncryptionState.failed;
+  /// Import MEK from recovery (passphrase decryption). Call after successful recovery.
+  /// Stores MEK in secure storage and sets state to ready.
+  Future<void> importMekFromRecovery(String userId, Uint8List mekBytes) async {
+    await _storeMekAndInit(mekBytes);
+    debugPrint('EncryptionService: MEK imported from recovery (Ready).');
+
+    // Re-upload wrapped MEK to Firebase so future devices can access it
+    final repo = _cryptoRepository;
+    if (repo != null) {
+      try {
+        final salt = encrypt.Key.fromSecureRandom(32).bytes;
+        final wrappingKey = _deriveWrappingKey(userId, salt);
+        final wrappedMek = _wrapMek(mekBytes, wrappingKey);
+        await repo.setWrappedMek(
+          userId,
+          wrappedMekBase64: base64Url.encode(wrappedMek),
+          saltBase64: base64Url.encode(salt),
+        );
+        debugPrint(
+          'EncryptionService: Re-uploaded wrapped MEK after recovery.',
+        );
+      } catch (e) {
+        debugPrint(
+          'EncryptionService: Failed to re-upload MEK after recovery: $e',
+        );
+      }
     }
   }
 
-  /// Wrap the current MEK with the given RSA public key (PEM). Used by an authorized device to approve a new device.
-  /// Throws if not ready or key cannot be parsed.
-  String wrapMekForPublicKey(String publicKeyPem) {
-    if (!isReady) throw StateError('EncryptionService not ready');
-    final key = parseKeyFromPem(publicKeyPem);
-    if (key is! RSAPublicKey) throw StateError('Expected public key');
-    return _wrapMekWithPublicKey(_key.bytes, key);
-  }
-
-  /// Migrate from legacy device-bound key to E2EE: generate new RSA+MEK, upload to Firebase, switch to new key, delete legacy key.
-  /// Call when [hasLegacyKey] is true. Caller must re-write all expenses to Hive after this so they are re-encrypted with the new MEK.
+  /// Migrate from legacy device-bound key to new MEK system.
+  /// Generates new MEK, uploads to Firebase, deletes legacy key.
+  /// Caller must re-write all expenses to Hive after this so they are
+  /// re-encrypted with the new MEK.
   Future<void> runMigrationFromLegacyKey(String userId) async {
     final repo = _cryptoRepository;
     if (!hasLegacyKey || repo == null) {
-      throw StateError('Migration only when hasLegacyKey and CryptoRepository set');
+      throw StateError(
+        'Migration only when hasLegacyKey and CryptoRepository set',
+      );
     }
     await _bootstrap(userId, repo);
     await _storage.delete(key: _storageKeyLegacyKey);

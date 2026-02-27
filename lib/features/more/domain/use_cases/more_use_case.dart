@@ -1,7 +1,6 @@
 import 'package:dartz/dartz.dart';
 import '../repositories/more_repository.dart';
 
-
 class MoreUseCase {
   final MoreRepository repository;
 
@@ -11,4 +10,3 @@ class MoreUseCase {
     return await repository.callApi();
   }
 }
-

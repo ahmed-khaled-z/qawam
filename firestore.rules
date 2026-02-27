@@ -31,10 +31,10 @@ service cloud.firestore {
     match /users/{userId}/categories/{categoryId} {
       allow read, write: if request.auth != null && request.auth.uid == userId;
     }
-    match /users/{userId}/crypto_devices/{deviceId} {
+    match /users/{userId}/crypto/mek {
       allow read, write: if request.auth != null && request.auth.uid == userId;
     }
-    match /users/{userId}/crypto_pending/{deviceId} {
+    match /users/{userId}/crypto_recovery/recovery {
       allow read, write: if request.auth != null && request.auth.uid == userId;
     }
   }

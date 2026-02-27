@@ -7,7 +7,7 @@ import '../../../../config/app_helper/app_gaps.dart';
 import '../../../../config/app_helper/app_padding.dart';
 import '../../../../config/language/language_manager.dart';
 import '../../../../config/router/app_router.dart';
-import '../../../../features/device_authorization/presentation/screens/device_authorization_waiting_screen.dart';
+
 import '../../../../injection_container.dart';
 import '../cubit/login_cubit.dart';
 import '../cubit/login_state.dart';
@@ -65,14 +65,7 @@ class _LoginScreenState extends State<LoginScreen>
           if (state.status == LoginStatus.success) {
             AppRouter.toAndRemoveUntil('/home');
           }
-          if (state.status == LoginStatus.needsDeviceAuthorization &&
-              state.user != null) {
-            AppRouter.navigatorKey.currentState?.pushNamedAndRemoveUntil(
-              DeviceAuthorizationWaitingScreen.routeName,
-              (route) => false,
-              arguments: {'userId': state.user!.uid},
-            );
-          }
+
           if (state.status == LoginStatus.error) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
@@ -116,8 +109,7 @@ class _LoginScreenState extends State<LoginScreen>
                 ),
 
                 // Loading overlay
-                if (state.status == LoginStatus.loading)
-                  _buildLoadingOverlay(),
+                if (state.status == LoginStatus.loading) _buildLoadingOverlay(),
               ],
             ),
           );
@@ -216,9 +208,7 @@ class _LoginScreenState extends State<LoginScreen>
   Widget _buildGeometricPattern(BuildContext context) {
     final size = MediaQuery.of(context).size;
     return Positioned.fill(
-      child: CustomPaint(
-        painter: _ArabicPatternPainter(size: size),
-      ),
+      child: CustomPaint(painter: _ArabicPatternPainter(size: size)),
     );
   }
 
@@ -265,18 +255,11 @@ class _LoginScreenState extends State<LoginScreen>
               languageManager.toggleLanguage();
             },
             child: Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 14,
-                vertical: 8,
-              ),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Icon(
-                    Icons.language,
-                    color: Colors.white,
-                    size: 18,
-                  ),
+                  const Icon(Icons.language, color: Colors.white, size: 18),
                   const SizedBox(width: 6),
                   Text(
                     isArabic ? 'English' : 'العربية',
@@ -536,25 +519,44 @@ class _GoogleLogoPainter extends CustomPainter {
     final radius = w / 2;
 
     canvas.drawArc(
-        Rect.fromCircle(center: center, radius: radius),
-        -0.5, 1.2, true, bluePaint);
+      Rect.fromCircle(center: center, radius: radius),
+      -0.5,
+      1.2,
+      true,
+      bluePaint,
+    );
     canvas.drawArc(
-        Rect.fromCircle(center: center, radius: radius),
-        -1.7, 1.2, true, redPaint);
+      Rect.fromCircle(center: center, radius: radius),
+      -1.7,
+      1.2,
+      true,
+      redPaint,
+    );
     canvas.drawArc(
-        Rect.fromCircle(center: center, radius: radius),
-        1.9, 1.2, true, yellowPaint);
+      Rect.fromCircle(center: center, radius: radius),
+      1.9,
+      1.2,
+      true,
+      yellowPaint,
+    );
     canvas.drawArc(
-        Rect.fromCircle(center: center, radius: radius),
-        0.7, 1.2, true, greenPaint);
+      Rect.fromCircle(center: center, radius: radius),
+      0.7,
+      1.2,
+      true,
+      greenPaint,
+    );
 
     canvas.drawCircle(center, radius * 0.55, Paint()..color = Colors.white);
 
     canvas.drawRect(
-        Rect.fromLTWH(w * 0.48, h * 0.35, w * 0.52, h * 0.3), bluePaint);
+      Rect.fromLTWH(w * 0.48, h * 0.35, w * 0.52, h * 0.3),
+      bluePaint,
+    );
     canvas.drawRect(
-        Rect.fromLTWH(w * 0.48, h * 0.35, w * 0.52, h * 0.12),
-        Paint()..color = Colors.white);
+      Rect.fromLTWH(w * 0.48, h * 0.35, w * 0.52, h * 0.12),
+      Paint()..color = Colors.white,
+    );
   }
 
   @override

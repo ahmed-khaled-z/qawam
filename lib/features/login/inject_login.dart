@@ -9,10 +9,7 @@ import 'presentation/cubit/login_cubit.dart';
 void injectLogin() {
   // cubit
   getIt.registerFactory(
-    () => LoginCubit(
-      loginUseCase: getIt(),
-      encryptionService: getIt(),
-    ),
+    () => LoginCubit(loginUseCase: getIt(), encryptionService: getIt()),
   );
 
   // Repository

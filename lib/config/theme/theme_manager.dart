@@ -9,7 +9,7 @@ class ThemeManager extends ChangeNotifier {
   ThemeData _themeData;
 
   ThemeManager(this._isDarkTheme)
-      : _themeData = _isDarkTheme ? darkTheme : lightTheme;
+    : _themeData = _isDarkTheme ? darkTheme : lightTheme;
 
   ThemeData get themeData => _themeData;
   bool get isDarkTheme => _isDarkTheme;
@@ -37,4 +37,3 @@ late ThemeManager themeManager;
 Future<void> toggleTheme() async {
   themeManager.toggleTheme();
 }
-

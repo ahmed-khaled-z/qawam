@@ -16,8 +16,8 @@ import 'package:qawam/features/settings/data/data_sources/local/settings_local_d
 import 'core/network/api_provider.dart';
 import 'core/security/crypto_repository.dart';
 import 'core/security/crypto_repository_impl.dart';
-import 'core/security/device_authorization_service.dart';
 import 'core/security/encryption_service.dart';
+import 'core/security/recovery_key_service.dart';
 import 'package:qawam/features/categories/data/adapters/category_adapter.dart';
 import 'package:qawam/features/categories/data/models/category_model.dart';
 import 'features/home/data/adapters/expense_adapter.dart';
@@ -30,15 +30,6 @@ import 'core/sync/sync_service.dart';
 
 final GetIt getIt = GetIt.instance;
 
-// how to use
-// ignore: slash_for_doc_comments
-/**
- * Future.wait([
-    ServiceLocator().setup(),
-    ]).then((value) {
-    runApp(const App());
-    });
- * **/
 class ServiceLocator {
   Future<void> setup() async {
     // Hive Init
@@ -57,7 +48,7 @@ class ServiceLocator {
     await getIt<EncryptionService>().init();
 
     getIt.registerLazySingleton(
-      () => DeviceAuthorizationService(
+      () => RecoveryKeyService(
         getIt<CryptoRepository>(),
         getIt<EncryptionService>(),
       ),

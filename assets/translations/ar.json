@@ -71,6 +71,7 @@
     "select_category_error": "يرجى اختيار تصنيف",
     "enter_amount_error": "يرجى إدخال مبلغ صحيح",
     "expense_added_success": "تم إضافة المصروف بنجاح",
+    "add_expense_error": "فشل في إضافة المصروف",
     "no_expenses_yet": "لا توجد مصروفات بعد",
     "welcome_subtitle": "جاهز لتتبع مصروفاتك؟",
     "currency_sar": "ر.س",
@@ -117,7 +118,6 @@
     "suggest_status_approved": "موافق عليه",
     "suggest_status_rejected": "مرفوض",
     "suggest_status_implemented": "تم تنفيذه",
-
     "intro_slide1_title": "تتبّع كل مصروف",
     "intro_slide1_desc": "افهم أين تذهب أموالك.\nتحكّم في عاداتك المالية\nبتتبّع بسيط وذكي.",
     "intro_slide2_title": "يعمل بدون إنترنت",

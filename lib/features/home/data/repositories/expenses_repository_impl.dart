@@ -1,4 +1,5 @@
 import 'package:dartz/dartz.dart';
+import 'package:flutter/foundation.dart';
 import '../../domain/entities/expense.dart';
 import '../../domain/repositories/expenses_repository.dart';
 import '../data_sources/local/expenses_local_data_source.dart';
@@ -29,11 +30,28 @@ class ExpensesRepositoryImpl implements ExpensesRepository {
         lastSyncedAt: model.lastSyncedAt,
       );
       await localDataSource.addExpense(unsyncedModel);
-      // Attempt immediate sync
-      syncRepository.syncExpenses();
+      debugPrint(
+        'ExpensesRepository: Expense ${expense.id} saved locally '
+        '(amount: ${expense.amount}).',
+      );
+
+      // Attempt immediate sync (fire-and-forget, don't block local save)
+      try {
+        syncRepository.syncExpenses();
+      } catch (syncError) {
+        debugPrint(
+          'ExpensesRepository: Sync attempt failed for ${expense.id}, '
+          'will retry later. Error: $syncError',
+        );
+      }
+
       return const Right(null);
-    } catch (e) {
-      return Left(Exception(e.toString()));
+    } catch (e, stackTrace) {
+      debugPrint(
+        'ExpensesRepository: FAILED to save expense ${expense.id}. '
+        'Error: $e\nStack: $stackTrace',
+      );
+      return Left(Exception('Failed to save expense: $e'));
     }
   }
 
@@ -42,10 +60,21 @@ class ExpensesRepositoryImpl implements ExpensesRepository {
     try {
       await localDataSource.deleteExpense(id);
       await syncRepository.addPendingDeletion(id, 'expenses');
-      syncRepository.processPendingDeletions();
+      debugPrint('ExpensesRepository: Expense $id deleted locally.');
+
+      try {
+        syncRepository.processPendingDeletions();
+      } catch (syncError) {
+        debugPrint(
+          'ExpensesRepository: Pending deletion sync failed for $id: '
+          '$syncError',
+        );
+      }
+
       return const Right(null);
     } catch (e) {
-      return Left(Exception(e.toString()));
+      debugPrint('ExpensesRepository: FAILED to delete expense $id: $e');
+      return Left(Exception('Failed to delete expense: $e'));
     }
   }
 
@@ -53,9 +82,13 @@ class ExpensesRepositoryImpl implements ExpensesRepository {
   Future<Either<Exception, List<Expense>>> getExpenses() async {
     try {
       final expenses = await localDataSource.getAllExpenses();
+      debugPrint(
+        'ExpensesRepository: Loaded ${expenses.length} expenses from local.',
+      );
       return Right(expenses);
     } catch (e) {
-      return Left(Exception(e.toString()));
+      debugPrint('ExpensesRepository: FAILED to load expenses: $e');
+      return Left(Exception('Failed to load expenses: $e'));
     }
   }
 }

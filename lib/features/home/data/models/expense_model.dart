@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import '../../domain/entities/expense.dart';
 import '../../../../../../core/security/encryption_service.dart';
 import '../../../../../../injection_container.dart';
@@ -30,18 +31,28 @@ class ExpenseModel extends Expense {
     double amount;
 
     // Decrypt if available, otherwise use plain text (migration/legacy)
-    if (json['encryptedAmount'] != null) {
+    if (json['encryptedAmount'] != null && encryptionService.isReady) {
       try {
         amount = encryptionService.decryptValue(
           json['encryptedAmount'] as String,
         );
       } catch (e) {
-        // Fallback or rethrow?
-        // If decryption fails, data is unreadable.
-        amount = 0.0;
+        debugPrint(
+          'ExpenseModel.fromJson: Decryption failed for ${json['id']}: $e',
+        );
+        // Fall back to plain amount if available, otherwise 0.0
+        amount = (json['amount'] as num?)?.toDouble() ?? 0.0;
       }
-    } else {
+    } else if (json['amount'] != null) {
       amount = (json['amount'] as num).toDouble();
+    } else if (json['encryptedAmount'] != null && !encryptionService.isReady) {
+      debugPrint(
+        'ExpenseModel.fromJson: Encryption not ready, cannot decrypt '
+        'expense ${json['id']}. Setting amount to 0.0.',
+      );
+      amount = 0.0;
+    } else {
+      amount = 0.0;
     }
 
     return ExpenseModel(
@@ -59,15 +70,34 @@ class ExpenseModel extends Expense {
 
   Map<String, dynamic> toJson() {
     final encryptionService = getIt<EncryptionService>();
-    return {
+    final json = <String, dynamic>{
       'id': id,
-      'encryptedAmount': encryptionService.encryptValue(amount),
-      // 'amount': amount, // Removed for security
       'date': date.toIso8601String(),
       'categoryId': categoryId,
       'note': note,
       'isSyncedToFirebase': isSyncedToFirebase,
       'lastSyncedAt': lastSyncedAt?.toIso8601String(),
     };
+
+    // Encrypt amount if encryption is ready; otherwise store plain amount.
+    if (encryptionService.isReady) {
+      try {
+        json['encryptedAmount'] = encryptionService.encryptValue(amount);
+      } catch (e) {
+        debugPrint(
+          'ExpenseModel.toJson: Encryption failed for $id, '
+          'storing plain amount. Error: $e',
+        );
+        json['amount'] = amount;
+      }
+    } else {
+      debugPrint(
+        'ExpenseModel.toJson: Encryption not ready for $id, '
+        'storing plain amount.',
+      );
+      json['amount'] = amount;
+    }
+
+    return json;
   }
 }

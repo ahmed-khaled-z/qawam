@@ -71,6 +71,7 @@
     "select_category_error": "Please select a category",
     "enter_amount_error": "Please enter a valid amount",
     "expense_added_success": "Expense added successfully",
+    "add_expense_error": "Failed to add expense",
     "no_expenses_yet": "No expenses yet",
     "welcome_subtitle": "Ready to track your expenses?",
     "currency_sar": "SAR",
@@ -117,7 +118,6 @@
     "suggest_status_approved": "Approved",
     "suggest_status_rejected": "Rejected",
     "suggest_status_implemented": "Implemented",
-
     "intro_slide1_title": "Track Every Expense",
     "intro_slide1_desc": "Understand where your money goes.\nTake control of your financial habits\nwith simple, smart tracking.",
     "intro_slide2_title": "Works Offline",

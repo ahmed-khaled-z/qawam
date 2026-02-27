@@ -7,4 +7,3 @@ class AppFormats {
   static DateFormat dateTimeFormat = DateFormat("dd-MMMM-yyyy hh:mm a");
   static DateFormat format = DateFormat('dd-MM-yyyy hh:mm a');
 }
-

@@ -4,11 +4,7 @@ import 'domain/repositories/intro_repository.dart';
 import 'presentation/cubit/intro_cubit.dart';
 
 void injectIntro() {
-  getIt.registerLazySingleton<IntroRepository>(
-    () => IntroRepositoryImpl(),
-  );
+  getIt.registerLazySingleton<IntroRepository>(() => IntroRepositoryImpl());
 
-  getIt.registerFactory(
-    () => IntroCubit(repository: getIt()),
-  );
+  getIt.registerFactory(() => IntroCubit(repository: getIt()));
 }

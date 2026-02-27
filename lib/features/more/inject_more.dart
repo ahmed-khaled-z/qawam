@@ -12,13 +12,14 @@ void injectMore() {
 
   // Repository
   getIt.registerLazySingleton<MoreRepository>(
-          () => MoreRepositoryImpl(remoteDataSource: getIt()));
+    () => MoreRepositoryImpl(remoteDataSource: getIt()),
+  );
 
   // UseCases
   getIt.registerLazySingleton(() => MoreUseCase(getIt()));
 
   // DataSources
   getIt.registerLazySingleton<MoreRemoteDataSource>(
-          () => MoreRemoteDataSourceImpl());
+    () => MoreRemoteDataSourceImpl(),
+  );
 }
-      

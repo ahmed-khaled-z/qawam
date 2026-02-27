@@ -1,6 +1,5 @@
 import 'package:dartz/dartz.dart';
 
-
 abstract class ProfileLocalDataSource {
   Future<Unit> getFromLocalDataBase();
 }
@@ -13,6 +12,4 @@ class ProfileLocalDataSourceImpl implements ProfileLocalDataSource {
     // send api request here
     return Future.value(unit);
   }
-
 }
-  

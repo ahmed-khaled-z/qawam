@@ -1,12 +1,6 @@
 import '../../domain/entities/login.dart';
 
-enum LoginStatus {
-  initial,
-  loading,
-  success,
-  needsDeviceAuthorization,
-  error,
-}
+enum LoginStatus { initial, loading, success, error }
 
 class LoginState {
   final LoginStatus status;

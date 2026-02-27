@@ -2,7 +2,6 @@ import 'package:dartz/dartz.dart';
 import '../../domain/repositories/spalsh_repository.dart';
 import '../data_sources/remote/spalsh_remote_data_source.dart';
 
-
 class SpalshRepositoryImpl implements SpalshRepository {
   final SpalshRemoteDataSource remoteDataSource;
 
@@ -16,6 +15,4 @@ class SpalshRepositoryImpl implements SpalshRepository {
       return Left(exception);
     }
   }
-
 }
-

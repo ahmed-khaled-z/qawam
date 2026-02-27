@@ -1,7 +1,6 @@
 import 'package:dartz/dartz.dart';
 import '../repositories/statistics_repository.dart';
 
-
 class StatisticsUseCase {
   final StatisticsRepository repository;
 
@@ -11,4 +10,3 @@ class StatisticsUseCase {
     return await repository.callApi();
   }
 }
-

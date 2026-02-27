@@ -94,6 +94,7 @@ class _SettingsBody extends StatelessWidget {
                         context,
                         children: [_buildMonthStartTile(context, state)],
                       ),
+                      const SizedBox(height: 16),
                     ],
                   ),
                 ),

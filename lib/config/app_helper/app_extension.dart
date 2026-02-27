@@ -70,4 +70,3 @@ extension DateTimeExtension on DateTime {
 extension TimeOfDayExtension on TimeOfDay {
   DateTime get timeOfDayToDate => DateTime(0, 0, 0, hour, minute);
 }
-

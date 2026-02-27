@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../config/auth/auth_manager.dart';
@@ -16,10 +17,8 @@ class LoginCubit extends Cubit<LoginState> {
   final LoginUseCase loginUseCase;
   final EncryptionService encryptionService;
 
-  LoginCubit({
-    required this.loginUseCase,
-    required this.encryptionService,
-  }) : super(const LoginState(status: LoginStatus.initial));
+  LoginCubit({required this.loginUseCase, required this.encryptionService})
+    : super(const LoginState(status: LoginStatus.initial));
 
   Future<void> signInWithGoogle() async {
     emit(state.copyWith(status: LoginStatus.loading));
@@ -42,18 +41,35 @@ class LoginCubit extends Cubit<LoginState> {
         );
         await authManager.login(userModel.toJson());
 
-        await encryptionService.ensureReady(user.uid);
+        // Initialize encryption — seamlessly handles first device, new device,
+        // and returning device via Firebase-synced MEK.
+        try {
+          await encryptionService.ensureReady(user.uid);
+        } catch (e) {
+          debugPrint('LoginCubit: Encryption setup failed: $e');
+          emit(
+            state.copyWith(
+              status: LoginStatus.error,
+              user: user,
+              errorMessage: 'Could not set up encryption. Please try again.',
+            ),
+          );
+          return;
+        }
 
         if (encryptionService.isReady) {
           if (encryptionService.hasLegacyKey) {
             try {
               await _runMigration(user.uid);
             } catch (e) {
-              emit(state.copyWith(
-                status: LoginStatus.error,
-                user: user,
-                errorMessage: 'Migration failed. Please try again.',
-              ));
+              debugPrint('LoginCubit: Migration failed: $e');
+              emit(
+                state.copyWith(
+                  status: LoginStatus.error,
+                  user: user,
+                  errorMessage: 'Migration failed. Please try again.',
+                ),
+              );
               return;
             }
           }
@@ -61,26 +77,8 @@ class LoginCubit extends Cubit<LoginState> {
             await getIt<SyncService>().syncData();
           } catch (e) {
             // Fail silently during login sync attempt
+            debugPrint('LoginCubit: Post-login sync failed: $e');
           }
-          emit(state.copyWith(status: LoginStatus.success, user: user));
-          return;
-        }
-
-        if (encryptionService.state == EncryptionState.awaitingAuthorization) {
-          emit(state.copyWith(
-            status: LoginStatus.needsDeviceAuthorization,
-            user: user,
-          ));
-          return;
-        }
-
-        if (encryptionService.state == EncryptionState.failed) {
-          emit(state.copyWith(
-            status: LoginStatus.error,
-            user: user,
-            errorMessage: 'Could not set up encryption. Please try again.',
-          ));
-          return;
         }
 
         emit(state.copyWith(status: LoginStatus.success, user: user));
