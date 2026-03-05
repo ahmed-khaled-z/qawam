@@ -1,12 +1,7 @@
 import 'package:equatable/equatable.dart';
 
 /// Status of a feature suggestion for admin workflow.
-enum FeatureRequestStatus {
-  pending,
-  approved,
-  rejected,
-  implemented,
-}
+enum FeatureRequestStatus { pending, approved, rejected, implemented }
 
 extension FeatureRequestStatusX on FeatureRequestStatus {
   String get value {
@@ -54,5 +49,12 @@ class FeatureRequest extends Equatable {
   });
 
   @override
-  List<Object?> get props => [id, userId, message, additionalNotes, createdAt, status];
+  List<Object?> get props => [
+    id,
+    userId,
+    message,
+    additionalNotes,
+    createdAt,
+    status,
+  ];
 }

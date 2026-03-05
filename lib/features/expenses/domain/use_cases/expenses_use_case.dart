@@ -1,7 +1,6 @@
 import 'package:dartz/dartz.dart';
 import '../repositories/expenses_repository.dart';
 
-
 class ExpensesUseCase {
   final ExpensesRepository repository;
 
@@ -11,4 +10,3 @@ class ExpensesUseCase {
     return await repository.callApi();
   }
 }
-

@@ -7,8 +7,8 @@ class IntroCubit extends Cubit<IntroState> {
   final IntroRepository _repository;
 
   IntroCubit({required IntroRepository repository})
-      : _repository = repository,
-        super(const IntroState());
+    : _repository = repository,
+      super(const IntroState());
 
   void onPageChanged(int page) {
     emit(state.copyWith(currentPage: page));

@@ -2,7 +2,6 @@ import 'package:dartz/dartz.dart';
 import '../../domain/repositories/more_repository.dart';
 import '../data_sources/remote/more_remote_data_source.dart';
 
-
 class MoreRepositoryImpl implements MoreRepository {
   final MoreRemoteDataSource remoteDataSource;
 
@@ -16,6 +15,4 @@ class MoreRepositoryImpl implements MoreRepository {
       return Left(exception);
     }
   }
-
 }
-

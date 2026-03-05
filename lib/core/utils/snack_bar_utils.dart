@@ -2,7 +2,6 @@
 import 'package:flutter/material.dart';
 import '../../config/router/app_router.dart';
 
-
 class SnackBarUtils {
   static const Duration _defaultDuration = Duration(seconds: 3);
 
@@ -21,10 +20,7 @@ class SnackBarUtils {
     if (context != null) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(
-            message,
-            style: TextStyle(color: textColor),
-          ),
+          content: Text(message, style: TextStyle(color: textColor)),
           backgroundColor: backgroundColor,
           duration: duration,
           action: actionLabel != null
@@ -93,4 +89,3 @@ class SnackBarUtils {
     }
   }
 }
-

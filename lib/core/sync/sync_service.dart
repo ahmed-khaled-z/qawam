@@ -21,7 +21,9 @@ class SyncService {
       await _repository.processPendingDeletions();
       await _repository.syncCategories();
       if (!_encryptionService.isReady) {
-        debugPrint("SyncService: Skipping expenses sync and pull - encryption not ready.");
+        debugPrint(
+          "SyncService: Skipping expenses sync and pull - encryption not ready.",
+        );
         return;
       }
       await _repository.syncExpenses();

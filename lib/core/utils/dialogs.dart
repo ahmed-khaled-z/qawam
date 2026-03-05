@@ -2,7 +2,6 @@
 import 'package:flutter/material.dart';
 import '../../config/router/app_router.dart';
 
-
 class DialogUtils {
   // Show a custom dialog
   static void showDialogBox({
@@ -28,14 +27,8 @@ class DialogUtils {
         builder: (BuildContext context) {
           return AlertDialog(
             backgroundColor: backgroundColor,
-            title: Text(
-              title,
-              style: TextStyle(color: titleColor),
-            ),
-            content: Text(
-              message,
-              style: TextStyle(color: messageColor),
-            ),
+            title: Text(title, style: TextStyle(color: titleColor)),
+            content: Text(message, style: TextStyle(color: messageColor)),
             actions: <Widget>[
               if (negativeButtonLabel != null)
                 TextButton(
@@ -126,10 +119,7 @@ class DialogUtils {
               children: <Widget>[
                 CircularProgressIndicator(),
                 SizedBox(height: 20),
-                Text(
-                  message,
-                  style: TextStyle(color: Colors.black87),
-                ),
+                Text(message, style: TextStyle(color: Colors.black87)),
               ],
             ),
           );
@@ -171,4 +161,3 @@ class DialogUtils {
     }
   }
 }
-

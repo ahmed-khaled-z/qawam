@@ -1,6 +1,5 @@
 import 'package:dartz/dartz.dart';
 
-
 abstract class MoreRemoteDataSource {
   Future<Unit> callApi();
 }
@@ -13,8 +12,4 @@ class MoreRemoteDataSourceImpl implements MoreRemoteDataSource {
     // send api request here
     return Future.value(unit);
   }
-
 }
-
-
-  

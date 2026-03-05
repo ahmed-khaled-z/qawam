@@ -1,6 +1,6 @@
 import 'package:gap/gap.dart';
 
-class AppGaps{
+class AppGaps {
   static const extraSmallGap = Gap(2);
   static const soSmallGap = Gap(5);
   static const smallGap = Gap(10);

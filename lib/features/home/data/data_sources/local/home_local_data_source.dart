@@ -1,6 +1,5 @@
 import 'package:dartz/dartz.dart';
 
-
 abstract class HomeLocalDataSource {
   Future<Unit> getFromLocalDataBase();
 }
@@ -13,6 +12,4 @@ class HomeLocalDataSourceImpl implements HomeLocalDataSource {
     // send api request here
     return Future.value(unit);
   }
-
 }
-  

@@ -126,7 +126,9 @@ class SyncRepositoryImpl implements SyncRepository {
       return;
     }
     if (!_encryptionService.isReady) {
-      debugPrint("SyncRepository: Skipping syncExpenses - encryption not ready.");
+      debugPrint(
+        "SyncRepository: Skipping syncExpenses - encryption not ready.",
+      );
       return;
     }
 

@@ -1,7 +1,6 @@
 import 'package:dartz/dartz.dart';
 import '../repositories/spalsh_repository.dart';
 
-
 class SpalshUseCase {
   final SpalshRepository repository;
 
@@ -11,4 +10,3 @@ class SpalshUseCase {
     return await repository.callApi();
   }
 }
-

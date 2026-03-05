@@ -8,7 +8,7 @@ class FeatureRequestRepositoryImpl implements FeatureRequestRepository {
   final FeatureRequestRemoteDataSource _remote;
 
   FeatureRequestRepositoryImpl({required FeatureRequestRemoteDataSource remote})
-      : _remote = remote;
+    : _remote = remote;
 
   @override
   Future<Either<Exception, FeatureRequest>> submit({
@@ -29,6 +29,7 @@ class FeatureRequestRepositoryImpl implements FeatureRequestRepository {
   @override
   Stream<List<FeatureRequest>> streamMyRequests() {
     return _remote.streamMyRequests().map(
-        (models) => models.map<FeatureRequest>((m) => m.toEntity()).toList());
+      (models) => models.map<FeatureRequest>((m) => m.toEntity()).toList(),
+    );
   }
 }

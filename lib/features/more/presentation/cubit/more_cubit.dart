@@ -7,7 +7,7 @@ class MoreCubit extends Cubit<MoreState> {
   final MoreUseCase moreUseCase;
 
   MoreCubit({required this.moreUseCase})
-      : super(const MoreState(status: MoreStatus.initial));
+    : super(const MoreState(status: MoreStatus.initial));
 
   Future<void> fetchData() async {
     emit(state.copyWith(status: MoreStatus.loading));
@@ -21,12 +21,8 @@ class MoreCubit extends Cubit<MoreState> {
           errorMessage: exception.toString(),
         ),
       ),
-      (_) => emit(
-        state.copyWith(
-          status: MoreStatus.loaded,
-          errorMessage: null,
-        ),
-      ),
+      (_) =>
+          emit(state.copyWith(status: MoreStatus.loaded, errorMessage: null)),
     );
   }
 }

@@ -1,4 +1,3 @@
-
 class AppFunctions {
   /// Extracts the first number found in the given [input] string.
   ///
@@ -12,4 +11,3 @@ class AppFunctions {
     return number ?? ''; // Return an empty string if no number is found
   }
 }
-

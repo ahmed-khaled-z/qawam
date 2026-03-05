@@ -11,6 +11,5 @@ class SubmitFeatureRequestUseCase {
   Future<Either<Exception, FeatureRequest>> call({
     required String message,
     String? additionalNotes,
-  }) =>
-      _repository.submit(message: message, additionalNotes: additionalNotes);
+  }) => _repository.submit(message: message, additionalNotes: additionalNotes);
 }

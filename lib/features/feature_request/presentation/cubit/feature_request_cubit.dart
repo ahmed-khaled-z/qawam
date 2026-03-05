@@ -16,9 +16,9 @@ class FeatureRequestCubit extends Cubit<FeatureRequestState> {
   FeatureRequestCubit({
     required SubmitFeatureRequestUseCase submitUseCase,
     required StreamMyFeatureRequestsUseCase streamUseCase,
-  })  : _submitUseCase = submitUseCase,
-        _streamUseCase = streamUseCase,
-        super(const FeatureRequestState()) {
+  }) : _submitUseCase = submitUseCase,
+       _streamUseCase = streamUseCase,
+       super(const FeatureRequestState()) {
     _subscribeToMyRequests();
   }
 
@@ -34,23 +34,30 @@ class FeatureRequestCubit extends Cubit<FeatureRequestState> {
     );
   }
 
-  Future<void> submit({required String message, String? additionalNotes}) async {
+  Future<void> submit({
+    required String message,
+    String? additionalNotes,
+  }) async {
     if (!state.canSubmit) return;
 
     final trimmedMessage = message.trim();
     if (trimmedMessage.isEmpty) {
-      emit(state.copyWith(
-        submitStatus: FeatureRequestSubmitStatus.failure,
-        submitError: 'Message is required',
-      ));
+      emit(
+        state.copyWith(
+          submitStatus: FeatureRequestSubmitStatus.failure,
+          submitError: 'Message is required',
+        ),
+      );
       return;
     }
 
-    emit(state.copyWith(
-      submitStatus: FeatureRequestSubmitStatus.loading,
-      submitError: null,
-      canSubmit: false,
-    ));
+    emit(
+      state.copyWith(
+        submitStatus: FeatureRequestSubmitStatus.loading,
+        submitError: null,
+        canSubmit: false,
+      ),
+    );
 
     final result = await _submitUseCase(
       message: trimmedMessage,
@@ -60,16 +67,20 @@ class FeatureRequestCubit extends Cubit<FeatureRequestState> {
     );
 
     result.fold(
-      (e) => emit(state.copyWith(
-        submitStatus: FeatureRequestSubmitStatus.failure,
-        submitError: e.toString(),
-        canSubmit: true,
-      )),
-      (_) => emit(state.copyWith(
-        submitStatus: FeatureRequestSubmitStatus.success,
-        submitError: null,
-        canSubmit: true,
-      )),
+      (e) => emit(
+        state.copyWith(
+          submitStatus: FeatureRequestSubmitStatus.failure,
+          submitError: e.toString(),
+          canSubmit: true,
+        ),
+      ),
+      (_) => emit(
+        state.copyWith(
+          submitStatus: FeatureRequestSubmitStatus.success,
+          submitError: null,
+          canSubmit: true,
+        ),
+      ),
     );
 
     // Cooldown: allow submit again after 3 seconds even if success
@@ -81,10 +92,12 @@ class FeatureRequestCubit extends Cubit<FeatureRequestState> {
   }
 
   void clearSubmitState() {
-    emit(state.copyWith(
-      submitStatus: FeatureRequestSubmitStatus.initial,
-      submitError: null,
-    ));
+    emit(
+      state.copyWith(
+        submitStatus: FeatureRequestSubmitStatus.initial,
+        submitError: null,
+      ),
+    );
   }
 
   @override

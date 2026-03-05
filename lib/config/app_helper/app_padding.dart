@@ -8,4 +8,3 @@ class AppPadding {
   static const soBigPadding = 80.0;
   static const extraBigPadding = 120.0;
 }
-

@@ -8,6 +8,7 @@ import '../../../../features/categories/presentation/cubit/categories_cubit.dart
 import '../../../../features/categories/presentation/cubit/categories_state.dart';
 import '../../domain/entities/expense.dart';
 import '../cubit/home_cubit.dart';
+import '../cubit/home_state.dart';
 import '../../../../features/settings/presentation/cubit/settings_cubit.dart';
 
 class AddExpenseSheet extends StatefulWidget {
@@ -67,20 +68,10 @@ class _AddExpenseSheetState extends State<AddExpenseSheet> {
         date: widget.expenseToEdit?.date ?? DateTime.now(),
         categoryId: _selectedCategory!.id,
         note: _noteController.text,
-        isSyncedToFirebase: widget.expenseToEdit?.isSyncedToFirebase ?? false,
+        isSyncedToFirebase: false, // Always mark as unsynced for new/edited
       );
 
-      if (widget.expenseToEdit != null) {
-        try {
-          context.read<HomeCubit>().addExpense(expense);
-        } catch (e) {
-          // Ignore
-        }
-      } else {
-        context.read<HomeCubit>().addExpense(expense);
-      }
-
-      Navigator.pop(context);
+      _addExpenseAndClose(expense);
     } else {
       if (_selectedCategory == null) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -88,6 +79,39 @@ class _AddExpenseSheetState extends State<AddExpenseSheet> {
         );
       }
     }
+  }
+
+  Future<void> _addExpenseAndClose(Expense expense) async {
+    final homeCubit = context.read<HomeCubit>();
+
+    // Listen for the result before closing
+    homeCubit
+        .addExpense(expense)
+        .then((_) {
+          if (!mounted) return;
+          final currentState = homeCubit.state;
+          if (currentState.status == HomeStatus.error) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(
+                  currentState.errorMessage ?? context.tr('add_expense_error'),
+                ),
+                backgroundColor: Colors.red,
+              ),
+            );
+          } else {
+            Navigator.pop(context);
+          }
+        })
+        .catchError((error) {
+          if (!mounted) return;
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('${context.tr('add_expense_error')}: $error'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        });
   }
 
   @override

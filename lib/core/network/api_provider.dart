@@ -22,10 +22,7 @@ class ApiProvider {
     try {
       var response = await _dio.request(
         url,
-        options: Options(
-          method: type.name.capitalize(),
-          headers: headers,
-        ),
+        options: Options(method: type.name.capitalize(), headers: headers),
         data: body,
       );
 

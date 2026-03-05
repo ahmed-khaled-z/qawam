@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../domain/entities/expense.dart';
 import '../../domain/use_cases/add_expense_use_case.dart';
@@ -22,29 +23,36 @@ class HomeCubit extends Cubit<HomeState> {
     // Fetch Metrics
     final metricsResult = await getDashboardMetricsUseCase();
 
-    // Fetch Recent (Metrics use case currently fetches all, but we might want separate call or optimized)
-    // For now, let's just reuse getExpensesUseCase to get list and take last 5.
+    // Fetch Recent
     final expensesResult = await getExpensesUseCase();
 
     expensesResult.fold(
-      (error) => emit(
-        state.copyWith(
-          status: HomeStatus.error,
-          errorMessage: error.toString(),
-        ),
-      ),
+      (error) {
+        debugPrint('HomeCubit.loadHomeData: Failed to load expenses: $error');
+        emit(
+          state.copyWith(
+            status: HomeStatus.error,
+            errorMessage: error.toString(),
+          ),
+        );
+      },
       (expenses) {
         // Sort by date desc
         expenses.sort((a, b) => b.date.compareTo(a.date));
         final recent = expenses.take(5).toList();
 
         metricsResult.fold(
-          (metricsError) => emit(
-            state.copyWith(
-              status: HomeStatus.error,
-              errorMessage: metricsError.toString(),
-            ),
-          ),
+          (metricsError) {
+            debugPrint(
+              'HomeCubit.loadHomeData: Failed to load metrics: $metricsError',
+            );
+            emit(
+              state.copyWith(
+                status: HomeStatus.error,
+                errorMessage: metricsError.toString(),
+              ),
+            );
+          },
           (metrics) {
             emit(
               state.copyWith(
@@ -61,16 +69,25 @@ class HomeCubit extends Cubit<HomeState> {
   }
 
   Future<void> addExpense(Expense expense) async {
+    debugPrint(
+      'HomeCubit.addExpense: Adding expense ${expense.id} '
+      '(amount: ${expense.amount}, category: ${expense.categoryId})',
+    );
     emit(state.copyWith(status: HomeStatus.adding));
+
     final result = await addExpenseUseCase(expense);
     result.fold(
-      (error) => emit(
-        state.copyWith(
-          status: HomeStatus.error,
-          errorMessage: error.toString(),
-        ),
-      ),
+      (error) {
+        debugPrint('HomeCubit.addExpense: FAILED - $error');
+        emit(
+          state.copyWith(
+            status: HomeStatus.error,
+            errorMessage: error.toString(),
+          ),
+        );
+      },
       (_) {
+        debugPrint('HomeCubit.addExpense: SUCCESS - reloading home data.');
         // Reload data
         loadHomeData();
       },

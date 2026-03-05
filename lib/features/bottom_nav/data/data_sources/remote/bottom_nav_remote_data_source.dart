@@ -1,6 +1,5 @@
 import 'package:dartz/dartz.dart';
 
-
 abstract class BottomNavRemoteDataSource {
   Future<Unit> callApi();
 }
@@ -13,8 +12,4 @@ class BottomNavRemoteDataSourceImpl implements BottomNavRemoteDataSource {
     // send api request here
     return Future.value(unit);
   }
-
 }
-
-
-  

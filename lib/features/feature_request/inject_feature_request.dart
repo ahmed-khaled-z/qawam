@@ -11,10 +11,7 @@ void injectFeatureRequest() {
   final getIt = GetIt.instance;
 
   getIt.registerFactory(
-    () => FeatureRequestCubit(
-      submitUseCase: getIt(),
-      streamUseCase: getIt(),
-    ),
+    () => FeatureRequestCubit(submitUseCase: getIt(), streamUseCase: getIt()),
   );
 
   getIt.registerLazySingleton(() => SubmitFeatureRequestUseCase(getIt()));

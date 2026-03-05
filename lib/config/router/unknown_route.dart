@@ -2,9 +2,7 @@ import 'package:flutter/material.dart';
 import '../app_helper/app_extension.dart';
 
 class UnknownRoute extends StatelessWidget {
-  const UnknownRoute({
-    super.key,
-  });
+  const UnknownRoute({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -16,13 +14,8 @@ class UnknownRoute extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Icon(
-              Icons.warning,
-              size: 150,
-            ),
-            Text(
-              'Page Not Found',
-            ),
+            Icon(Icons.warning, size: 150),
+            Text('Page Not Found'),
             Text('You missed your way !!'),
           ],
         ),

@@ -26,7 +26,6 @@ class Expense extends Equatable {
     date,
     categoryId,
     note,
-    note,
     isSyncedToFirebase,
     lastSyncedAt,
   ];

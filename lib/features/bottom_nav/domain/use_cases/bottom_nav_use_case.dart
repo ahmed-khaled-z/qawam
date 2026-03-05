@@ -1,7 +1,6 @@
 import 'package:dartz/dartz.dart';
 import '../repositories/bottom_nav_repository.dart';
 
-
 class BottomNavUseCase {
   final BottomNavRepository repository;
 
@@ -11,4 +10,3 @@ class BottomNavUseCase {
     return await repository.callApi();
   }
 }
-

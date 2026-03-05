@@ -1,6 +1,5 @@
 import 'package:dartz/dartz.dart';
 
-
 abstract class BottomNavLocalDataSource {
   Future<Unit> getFromLocalDataBase();
 }
@@ -13,6 +12,4 @@ class BottomNavLocalDataSourceImpl implements BottomNavLocalDataSource {
     // send api request here
     return Future.value(unit);
   }
-
 }
-  

@@ -36,7 +36,8 @@ class Logger {
       String formattedMessage = '$color$border\n';
 
       for (String line in lines) {
-        formattedMessage += '*  $line${' ' * (_maxLineLength - line.length)}  *\n';
+        formattedMessage +=
+            '*  $line${' ' * (_maxLineLength - line.length)}  *\n';
       }
 
       formattedMessage += '$border$_reset';
@@ -48,9 +49,15 @@ class Logger {
   static List<String> _splitMessageIntoLines(String message) {
     List<String> lines = [];
     for (int i = 0; i < message.length; i += _maxLineLength) {
-      lines.add(message.substring(i, i + _maxLineLength > message.length ? message.length : i + _maxLineLength));
+      lines.add(
+        message.substring(
+          i,
+          i + _maxLineLength > message.length
+              ? message.length
+              : i + _maxLineLength,
+        ),
+      );
     }
     return lines;
   }
 }
-

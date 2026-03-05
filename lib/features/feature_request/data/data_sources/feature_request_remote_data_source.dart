@@ -14,15 +14,16 @@ abstract class FeatureRequestRemoteDataSource {
   Stream<List<FeatureRequestModel>> streamMyRequests();
 }
 
-class FeatureRequestRemoteDataSourceImpl implements FeatureRequestRemoteDataSource {
+class FeatureRequestRemoteDataSourceImpl
+    implements FeatureRequestRemoteDataSource {
   final FirebaseFirestore _firestore;
   final FirebaseAuth _auth;
 
   FeatureRequestRemoteDataSourceImpl({
     FirebaseFirestore? firestore,
     FirebaseAuth? auth,
-  })  : _firestore = firestore ?? FirebaseFirestore.instance,
-        _auth = auth ?? FirebaseAuth.instance;
+  }) : _firestore = firestore ?? FirebaseFirestore.instance,
+       _auth = auth ?? FirebaseAuth.instance;
 
   User? get _currentUser => _auth.currentUser;
 
@@ -65,13 +66,11 @@ class FeatureRequestRemoteDataSourceImpl implements FeatureRequestRemoteDataSour
 
     // Query by userId only (no orderBy) so no composite index is required.
     // Sort by createdAt descending in Dart.
-    return _collection
-        .where('userId', isEqualTo: user.uid)
-        .snapshots()
-        .map((snapshot) {
+    return _collection.where('userId', isEqualTo: user.uid).snapshots().map((
+      snapshot,
+    ) {
       final list = snapshot.docs
-          .map((doc) =>
-              FeatureRequestModel.fromFirestore(doc.data(), doc.id))
+          .map((doc) => FeatureRequestModel.fromFirestore(doc.data(), doc.id))
           .toList();
       list.sort((a, b) => b.createdAt.compareTo(a.createdAt));
       return list;

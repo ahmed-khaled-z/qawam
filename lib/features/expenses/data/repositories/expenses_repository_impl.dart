@@ -2,7 +2,6 @@ import 'package:dartz/dartz.dart';
 import '../../domain/repositories/expenses_repository.dart';
 import '../data_sources/remote/expenses_remote_data_source.dart';
 
-
 class ExpensesRepositoryImpl implements ExpensesRepository {
   final ExpensesRemoteDataSource remoteDataSource;
 
@@ -16,6 +15,4 @@ class ExpensesRepositoryImpl implements ExpensesRepository {
       return Left(exception);
     }
   }
-
 }
-

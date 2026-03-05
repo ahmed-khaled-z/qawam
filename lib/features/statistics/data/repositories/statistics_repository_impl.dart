@@ -2,7 +2,6 @@ import 'package:dartz/dartz.dart';
 import '../../domain/repositories/statistics_repository.dart';
 import '../data_sources/remote/statistics_remote_data_source.dart';
 
-
 class StatisticsRepositoryImpl implements StatisticsRepository {
   final StatisticsRemoteDataSource remoteDataSource;
 
@@ -16,6 +15,4 @@ class StatisticsRepositoryImpl implements StatisticsRepository {
       return Left(exception);
     }
   }
-
 }
-
