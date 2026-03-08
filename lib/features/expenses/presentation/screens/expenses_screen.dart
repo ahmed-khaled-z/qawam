@@ -105,6 +105,7 @@ class _ExpensesBody extends StatelessWidget {
           return Column(
             children: [
               if (state.filters.hasFilters) _buildFilterSummary(context, state),
+              _buildTotalCard(context, state),
               Expanded(
                 child: RefreshIndicator(
                   onRefresh: () => context.read<ExpensesCubit>().loadExpenses(),
@@ -191,6 +192,63 @@ class _ExpensesBody extends StatelessWidget {
               padding: EdgeInsets.zero,
             ),
             child: Text(context.tr('reset')),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTotalCard(BuildContext context, ExpensesState state) {
+    final total = state.filteredExpenses.fold<double>(
+      0.0,
+      (sum, e) => sum + e.amount,
+    );
+    final locale = AppLocalizations.of(context)?.locale.toString() ?? 'en';
+    final currencyCode = context.select<SettingsCubit, String>(
+      (cubit) => cubit.state.settings.currency,
+    );
+    final currencyFormat = NumberFormat.simpleCurrency(
+      locale: locale,
+      name: currencyCode,
+      decimalDigits: 2,
+    );
+
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [Color(0xFF0D7377), Color(0xFF14A97C)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF0D7377).withValues(alpha: 0.3),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            context.tr('total_expenses'),
+            style: const TextStyle(
+              color: Colors.white70,
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          Text(
+            currencyFormat.format(total),
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
+            ),
           ),
         ],
       ),
